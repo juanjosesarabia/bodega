@@ -22,6 +22,7 @@ class CreateUsuario extends Migration
             $table->string('correo',200)->unique();           
             $table->string('contrasena');
             $table->string('tipo_usuario',20)->default("no asignado");
+            $table->softDeletes();
             $table->rememberToken();
             $table->timestamps();
         });

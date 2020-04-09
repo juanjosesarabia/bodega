@@ -26,6 +26,7 @@ class CreateProducto extends Migration
             $table->bigInteger('id_salida')->unsigned();
             $table->foreign('id_salida')->references('id_salida')->on('salida')->onDelete('cascade');
             $table->set('riesgo', ['si', 'no'])->default('no');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

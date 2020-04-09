@@ -2,25 +2,22 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Usuario;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
 |
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
+| Api de control de datos de bodega de espacio publico y movilidad
 |
 */
+Route::get('getUser','ControladorUsuario@userAll' );// obtener todos los usuarios registrados
+Route::post("validateUser",'ControladorUsuario@validateUser');//validar ingreso de usario
+Route::post("registerUser",'ControladorUsuario@registerUser');//Registrar usuario Nuevo
+Route::put("editUser",'ControladorUsuario@editUser'); //editar usuario
+Route::get('searchUser/{id}', 'ControladorUsuario@searchUser')->where('id', '[0-9]+');//Buscar usuario
+Route::put('resetPassword', 'ControladorUsuario@resetPassword');//cambiar contraseña
+Route::put('cambiarTipo', 'ControladorUsuario@cambiarTipo');//cambiar tipo de usuario
 
-Route::get("usuario",function(){
-  $usuario = Usuario::get();
-  return $usuario;
-});
- //pasamos por parametro el Request para obtener los datos por medio de post
-Route::post("usuario",function(Request $request){
-  return  $request->all();
-  
-});
+Route::delete('deleteUser/{id}','ControladorUsuario@deletetUser')->where('id', '[0-9]+'); // eliminar usuario de la tabla usuarios y asignalos al log
+

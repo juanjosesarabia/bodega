@@ -24,6 +24,7 @@ class CreateIngreso extends Migration
             $table->string('ubicacionOperativo', 200);            
             $table->bigInteger('id_vendedor')->unsigned();
             $table->foreign('id_vendedor')->references('id_vendedor')->on('vendedor')->onDelete('cascade');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

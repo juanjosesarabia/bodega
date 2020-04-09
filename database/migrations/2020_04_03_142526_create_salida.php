@@ -25,6 +25,7 @@ class CreateSalida extends Migration
             $table->integer("cantidadRetirada")->required();;
             $table->bigInteger('id_vendedor')->unsigned();
             $table->foreign('id_vendedor')->references('id_vendedor')->on('vendedor')->onDelete('cascade');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
