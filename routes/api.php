@@ -18,6 +18,6 @@ Route::put("editUser",'ControladorUsuario@editUser'); //editar usuario
 Route::get('searchUser/{id}', 'ControladorUsuario@searchUser')->where('id', '[0-9]+');//Buscar usuario
 Route::put('resetPassword', 'ControladorUsuario@resetPassword');//cambiar contraseña
 Route::put('cambiarTipo', 'ControladorUsuario@cambiarTipo');//cambiar tipo de usuario
-
-Route::delete('deleteUser/{id}','ControladorUsuario@deletetUser')->where('id', '[0-9]+'); // eliminar usuario de la tabla usuarios y asignalos al log
-
+Route::delete('deleteUser','ControladorUsuario@deletetUser'); // eliminar usuario de la tabla usuarios y asignalos al log
+Route::get('getUserDelete','ControladorUsuario@userAllDelete');//obtnertodos los usuarios registrados incluso los eliminados
+Route::post('restoreUser','ControladorUsuario@restoreUser');//obtnertodos los usuarios registrados incluso los eliminados

@@ -33,7 +33,7 @@ class ControladorUsuario extends Controller
     //método para registrar usuario 
     public function registerUser(Request $req){
         $usuario =  new Usuario; //instancia del modelo
-        $user = Usuario::get(); // se obtiene todos los objetos de la BD
+        $user = Usuario::withTrashed()->get(); // se obtiene todos los objetos de la BD
                 
         $cedula= $req->input('cedula'); //registros a comparar 
         $correo= $req->input('correo'); 
@@ -85,21 +85,26 @@ class ControladorUsuario extends Controller
       $id =  $req->input('id');     
            
       
-      if(!Usuario::findOrFail($id)){//verificar si en la bd hay registros
+      if(!Usuario::find($id)){//verificar si en la bd hay registros
             $data =["estado"=>"error","mensaje"=>"No se encontró dato de usuario a modificar"]; 
         return response($data,404);        
       }
       else{   
-           $userAll =Usuario::all();
-           $user = Usuario::findOrFail($id); 
+           $userAll =Usuario::withTrashed()->get();
+           $user = Usuario::find($id); 
 
         $cedula= $req->input('cedula'); //registros a comparar 
         $correo= $req->input('correo'); 
         $cont=0;
 
         foreach($userAll as $fila) {         
-           if ($fila->cedula==$cedula||$fila->correo==$correo) {
-            $cont++;  //se verifica duplicidad                   
+           if ($fila->cedula==$cedula||$fila->correo==$correo ) {
+            $cont++;  //se verifica duplicidad  
+                
+              if($fila->delete_at!=null){
+                $data =["estado"=>"error","mensaje"=>"Informacion de cédula o correo pertenece a otro usuario,Dato eliminado"];            
+                return response($data,400);
+              }             
           }}
            if($cont==0){
             $user->cedula = $req->input('cedula');
@@ -121,11 +126,36 @@ class ControladorUsuario extends Controller
       } 
     }
      //método para elimiar usuario registrado
-    public function deletetUser($id){
+    public function deletetUser(Request $req){
+      $id =  $req->input('id');
       $user = Usuario::find($id);
-      $user->delete();
-      return "Usuario Eliminado";
         
+      if(!$user){
+        $data =["estado"=>"error","mensaje"=>"Usuario  no se encuentra en registrado base de datos"];            
+        return response($data,404);
+      }else{
+        $user->delete();
+        $data =["estado"=>"ok","mensaje"=>"Usuario eliminado exitosamente"];            
+        return response($data,200);
+         
+      }     
+        
+    }
+    //metodo para obtener todos los usuarios registrados incluyendo los borrados
+    public function userAllDelete(){
+      $user = Usuario::onlyTrashed()->get();
+      $datos =[];
+       
+      if($user->isEmpty()){//verificar si en la bd hay registros
+        $data =["estado"=>"error","mensaje"=>"No hay datos eliminados guardados"]; 
+        return response($data,404);        
+      }else{
+        foreach($user as $fila) { 
+          $datos1 = array("id"=>$fila->id_usuario,"cedula"=>$fila->cedula,"nombres"=>$fila->nombres,"apellidos"=> $fila->apellidos,"correo"=> $fila->correo,"tipo_usuario"=>$fila->tipo_usuario,"Eliminado"=>$fila->deleted_at);   
+          array_push($datos, $datos1);                            
+         }
+        return response($datos, 200);        
+        }
     }
 
    
@@ -141,6 +171,7 @@ class ControladorUsuario extends Controller
         $data =["estado"=>"error","mensaje"=>"No se encontraron datos"]; 
         return response($data,404);  
       }
+
       
 
 
@@ -177,6 +208,22 @@ class ControladorUsuario extends Controller
       }else{
         $data =["estado"=>"error","mensaje"=>"Usuario no se encuentra en base de datos"]; 
         return response($data,404); 
+      }
+    }
+
+    //método restaurar usuario borrado
+    public function restoreUser(Request $req){
+      $id =  $req->input('id'); 
+      $user =Usuario::onlyTrashed()->find($id); 
+      
+        if($user && $user->deleted_at !=null){//verifica que el usuario cumpla las condciones         
+        Usuario::onlyTrashed()->find($id)->restore();
+        $data =["estado"=>"ok","mensaje"=>"Usuario restaurado con exito"]; 
+        return response($data,200);
+       
+      }else{
+        $data =["estado"=>"error","mensaje"=>"No se restauro usuario,usuario no se encuentra eliminado"]; 
+        return response($data,404);  
       }
     }
 
