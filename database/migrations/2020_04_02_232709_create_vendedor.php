@@ -20,7 +20,7 @@ class CreateVendedor extends Migration
             $table->String("nombres",45)->required();;
             $table->String("apellidos",45)->required();;            
             $table->String("telefono",45);           
-            $table->integer("historial");
+            $table->integer("historial")->default(0);
             $table->softDeletes();
             $table->timestamps();
         });

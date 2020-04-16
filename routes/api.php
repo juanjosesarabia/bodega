@@ -21,3 +21,6 @@ Route::put('cambiarTipo', 'ControladorUsuario@cambiarTipo');//cambiar tipo de us
 Route::delete('deleteUser','ControladorUsuario@deletetUser'); // eliminar usuario de la tabla usuarios y asignalos al log
 Route::get('getUserDelete','ControladorUsuario@userAllDelete');//obtnertodos los usuarios registrados incluso los eliminados
 Route::post('restoreUser','ControladorUsuario@restoreUser');//obtnertodos los usuarios registrados incluso los eliminados
+
+
+Route::post('registerVendedor', 'ControladorVendedor@registerVendedor');//Registrar Vendedor Nuevo
