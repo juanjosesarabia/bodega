@@ -18,9 +18,15 @@ Route::put("editUser",'ControladorUsuario@editUser'); //editar usuario
 Route::get('searchUser/{id}', 'ControladorUsuario@searchUser')->where('id', '[0-9]+');//Buscar usuario
 Route::put('resetPassword', 'ControladorUsuario@resetPassword');//cambiar contraseña
 Route::put('cambiarTipo', 'ControladorUsuario@cambiarTipo');//cambiar tipo de usuario
-Route::delete('deleteUser','ControladorUsuario@deletetUser'); // eliminar usuario de la tabla usuarios y asignalos al log
-Route::get('getUserDelete','ControladorUsuario@userAllDelete');//obtnertodos los usuarios registrados incluso los eliminados
-Route::post('restoreUser','ControladorUsuario@restoreUser');//obtnertodos los usuarios registrados incluso los eliminados
+Route::delete('deleteUser','ControladorUsuario@deletetUser'); // Estado eliminado para usuario
+Route::get('getUserDelete','ControladorUsuario@userAllDelete');//obtener usuarios eliminados
+Route::post('restoreUser','ControladorUsuario@restoreUser');//restaurar los usuarios borrados
 
 
 Route::post('registerVendedor', 'ControladorVendedor@registerVendedor');//Registrar Vendedor Nuevo
+Route::get('getVendedores', 'ControladorVendedor@vendedoresAll');//Registrar Vendedor Nuevo
+Route::put("editVendedor",'ControladorVendedor@editVendedor'); //editar vendedor
+Route::delete('deleteVendedor','ControladorVendedor@deleteVendedor'); // Estado eliminado para vendedor
+Route::get('getVendedorDelete','ControladorVendedor@vendedorAllDelete');//obtener vendedores eliminados
+Route::get('searchVendedor/{id}', 'ControladorVendedor@searchVendedor')->where('id', '[0-9]+');//Buscar un vendedor
+Route::post('restoreVendedor','ControladorVendedor@restoreVendedor');//Obtener vendedores eliminados
