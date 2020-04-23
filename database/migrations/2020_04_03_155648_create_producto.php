@@ -18,12 +18,12 @@ class CreateProducto extends Migration
             $table->bigIncrements('id_producto');
             $table->string('nombre', 100)->required();;
             $table->string('descripcion', 500)->required();; 
-            $table->string('codigoBarra', 100)->unique()->required();;
-            $table->bigInteger('id_vendedor')->unsigned();
+            $table->string('codigoBarra', 100)->unique()->required();
+            $table->bigInteger('id_vendedor')->unsigned()->nullable();
             $table->foreign('id_vendedor')->references('id_vendedor')->on('vendedor')->onDelete('cascade');
-            $table->bigInteger('id_ingreso')->unsigned();
+            $table->bigInteger('id_ingreso')->unsigned()->nullable();
             $table->foreign('id_ingreso')->references('id_ingreso')->on('ingreso')->onDelete('cascade');
-            $table->bigInteger('id_salida')->unsigned();
+            $table->bigInteger('id_salida')->unsigned()->nullable();
             $table->foreign('id_salida')->references('id_salida')->on('salida')->onDelete('cascade');
             $table->set('riesgo', ['si', 'no'])->default('no');
             $table->softDeletes();

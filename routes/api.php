@@ -24,9 +24,18 @@ Route::post('restoreUser','ControladorUsuario@restoreUser');//restaurar los usua
 
 
 Route::post('registerVendedor', 'ControladorVendedor@registerVendedor');//Registrar Vendedor Nuevo
-Route::get('getVendedores', 'ControladorVendedor@vendedoresAll');//Registrar Vendedor Nuevo
+Route::get('getVendedores', 'ControladorVendedor@vendedoresAll');//Obtener Vendedores sin eliminar
 Route::put("editVendedor",'ControladorVendedor@editVendedor'); //editar vendedor
 Route::delete('deleteVendedor','ControladorVendedor@deleteVendedor'); // Estado eliminado para vendedor
 Route::get('getVendedorDelete','ControladorVendedor@vendedorAllDelete');//obtener vendedores eliminados
 Route::get('searchVendedor/{id}', 'ControladorVendedor@searchVendedor')->where('id', '[0-9]+');//Buscar un vendedor
 Route::post('restoreVendedor','ControladorVendedor@restoreVendedor');//Obtener vendedores eliminados
+
+Route::post('registerProducto', 'ControladorProducto@registerproducto');//Registrar Producto Nuevo
+Route::get('getProducto', 'ControladorProducto@productoAll');//Obtener todos los productos
+Route::get('getsProducto', 'ControladorProducto@productosAll');//Obtener todos los productos con vendedores
+Route::get('getsProducDelete', 'ControladorProducto@productosDeleteAll');//Obtener todos los productos con vendedores y eliminados
+Route::put("editProducto",'ControladorProducto@editProducto'); //editar producto
+Route::delete('deleteProducto','ControladorProducto@deleteProducto'); // Estado eliminado para producto
+Route::get('searchProducto/{id}', 'ControladorProducto@searchProducto')->where('id', '[0-9]+');//Buscar un producto
+Route::post('restoreProducto','ControladorProducto@restoreProducto');//Obtener producto eliminados
