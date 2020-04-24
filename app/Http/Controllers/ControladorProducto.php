@@ -21,7 +21,7 @@ class ControladorProducto extends Controller
         $producto->descripcion = $req->input('descripcion');
         $producto->codigoBarra = $req->input('codigoBarra');
         $producto->id_vendedor = $req->input('id_vendedor'); 
-        $producto->riesgo = $req->input('riesgo');  
+        $producto->riesgo = $req->input('riesgo');        
         
         
         if(!$producto->save()){

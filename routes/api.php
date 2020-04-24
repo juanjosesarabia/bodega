@@ -39,3 +39,10 @@ Route::put("editProducto",'ControladorProducto@editProducto'); //editar producto
 Route::delete('deleteProducto','ControladorProducto@deleteProducto'); // Estado eliminado para producto
 Route::get('searchProducto/{id}', 'ControladorProducto@searchProducto')->where('id', '[0-9]+');//Buscar un producto
 Route::post('restoreProducto','ControladorProducto@restoreProducto');//Obtener producto eliminados
+
+Route::post('registerIngreso', 'ControladorIngreso@registerIngreso');//Registrar ingreso con productos
+Route::get('getIngreso', 'ControladorIngreso@ingresosAll');//Obtener todos los ingresos
+Route::get('getIngresoDelete', 'ControladorIngreso@ingresosDeleteAll');//Obtener todos los ingresos eliminados
+Route::delete('deleteIngreso','ControladorIngreso@deleteIngreso'); 
+Route::post('restoreIngreso','ControladorIngreso@restoreIngreso');//Restaurar ingresos eliminados
+Route::put("editIngreso",'ControladorIngreso@editIngreso'); //editar producto

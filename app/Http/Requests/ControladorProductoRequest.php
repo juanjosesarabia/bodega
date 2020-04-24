@@ -44,7 +44,7 @@ class ControladorProductoRequest extends FormRequest
         {
             return [
                 'nombre.required' => 'El nombre es obligatorio.',
-                'nombre.string' => 'La cédula debe ser numérica',
+                'nombre.string' => 'El nombre debe ser una cadena de datos',
                 'descripcion.required' => 'La descripcion es obligatoria.',
                 'descripcion.string' => 'La descripcion  debe ser cadena de datos',
                 'codigoBarra.required' => 'El codigo de barra es obligatorio.',
