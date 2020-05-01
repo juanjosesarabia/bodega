@@ -55,8 +55,9 @@ class ControladorProducto extends Controller
        //método para obtener todos los datos registrados de productos con vendedores
     public function productosAll(){
         $users = DB::table('producto')
-            ->join('vendedor', 'vendedor.id_vendedor', '=', 'producto.id_vendedor')           
-            ->select('producto.id_producto','producto.nombre','producto.codigoBarra','producto.riesgo','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos','vendedor.telefono')
+            ->join('vendedor', 'vendedor.id_vendedor', '=', 'producto.id_vendedor') 
+            ->join('ingreso', 'ingreso.id_ingreso', '=', 'producto.id_ingreso')           
+            ->select('producto.id_producto','producto.nombre','producto.codigoBarra','producto.riesgo','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos','vendedor.telefono','ingreso.fechaIngreso','ingreso.numero_acta')
             ->where("producto.deleted_at","=",null )
             ->get();
 
@@ -147,6 +148,42 @@ class ControladorProducto extends Controller
           $data =["estado"=>"error","mensaje"=>"No se encontraron datos"]; 
           return response($data,404);  
         }}
+
+       /// metodo para buscar porducto por codigo de barra
+        public function searchProductoC($codigo){           
+            $pro  = DB::table('producto')
+            ->join('vendedor', 'vendedor.id_vendedor', '=', 'producto.id_vendedor') 
+            ->join('ingreso', 'ingreso.id_ingreso', '=', 'producto.id_ingreso')           
+            ->select('producto.id_producto','producto.nombre','producto.codigoBarra','producto.riesgo','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos','vendedor.telefono','ingreso.fechaIngreso','ingreso.numero_acta')
+            ->where('codigoBarra',"=", $codigo)
+            ->where("producto.deleted_at","=",null )
+            ->get();
+            
+          if(!$pro->isEmpty()){        
+            return response($pro,200);
+                              
+            }else{
+              $data =["estado"=>"error","mensaje"=>"No se encontraron datos"]; 
+              return response($data,404);  
+            }}
+
+         /// metodo para buscar porducto por codigo de barra
+         public function searchProductoE($estado){           
+            $pro  = DB::table('producto')
+            ->join('vendedor', 'vendedor.id_vendedor', '=', 'producto.id_vendedor') 
+            ->join('ingreso', 'ingreso.id_ingreso', '=', 'producto.id_ingreso')           
+            ->select('producto.id_producto','producto.nombre','producto.codigoBarra','producto.riesgo','producto.Estado','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos','vendedor.telefono','ingreso.fechaIngreso','ingreso.numero_acta')
+            ->where('Estado',"=", $estado)
+            ->where("producto.deleted_at","=",null )
+            ->get();
+            
+          if(!$pro->isEmpty()){        
+            return response($pro,200);
+                              
+            }else{
+              $data =["estado"=>"error","mensaje"=>"No se encontraron datos"]; 
+              return response($data,404);  
+            }}
 
 
       //método restaurar producto borrado

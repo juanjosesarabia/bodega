@@ -19,12 +19,12 @@ class CreateSalida extends Migration
             $table->integer('cedulaNombreRetira')->required();;
             $table->string('nombreRetira', 300)->required();;
             $table->set('salidaAprobada', ['si', 'no'])->default('no');;
-            $table->date('fechaSalida')->required();;
-            $table->integer('cedulaNombreOficiaSalida')->required();;
-            $table->string('nombreOficiaSalida', 300)->required();;
-            $table->integer("cantidadRetirada")->required();;
-            $table->bigInteger('id_vendedor')->unsigned();
-            $table->foreign('id_vendedor')->references('id_vendedor')->on('vendedor')->onDelete('cascade');
+            $table->date('fechaSalida');
+            $table->integer('cedulaNombreOficiaSalida');
+            $table->string('nombreOficiaSalida', 300)->default('Espera');
+            $table->integer("cantidadRetirada")->required();
+            $table->bigInteger('id_ingreso')->unsigned();
+            $table->foreign('id_ingreso')->references('id_ingreso')->on('ingreso')->onDelete('cascade');
             $table->softDeletes();
             $table->timestamps();
         });

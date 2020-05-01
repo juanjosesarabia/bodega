@@ -16,7 +16,8 @@ Route::post("validateUser",'ControladorUsuario@validateUser');//validar ingreso 
 Route::post("registerUser",'ControladorUsuario@registerUser');//Registrar usuario Nuevo
 Route::put("editUser",'ControladorUsuario@editUser'); //editar usuario
 Route::get('searchUser/{id}', 'ControladorUsuario@searchUser')->where('id', '[0-9]+');//Buscar usuario
-Route::put('resetPassword', 'ControladorUsuario@resetPassword');//cambiar contraseña
+Route::get('searchUserCc/{cc}', 'ControladorUsuario@searchUserCc')->where('cc', '[0-9]+');//Buscar usuario
+Route::put('resetPasswordAd', 'ControladorUsuario@resetPasswordAd');//cambiar contraseña administrador
 Route::put('cambiarTipo', 'ControladorUsuario@cambiarTipo');//cambiar tipo de usuario
 Route::delete('deleteUser','ControladorUsuario@deletetUser'); // Estado eliminado para usuario
 Route::get('getUserDelete','ControladorUsuario@userAllDelete');//obtener usuarios eliminados
@@ -29,6 +30,7 @@ Route::put("editVendedor",'ControladorVendedor@editVendedor'); //editar vendedor
 Route::delete('deleteVendedor','ControladorVendedor@deleteVendedor'); // Estado eliminado para vendedor
 Route::get('getVendedorDelete','ControladorVendedor@vendedorAllDelete');//obtener vendedores eliminados
 Route::get('searchVendedor/{id}', 'ControladorVendedor@searchVendedor')->where('id', '[0-9]+');//Buscar un vendedor
+Route::get('searchVendedorCc/{cc}', 'ControladorVendedor@searchVendedorCc')->where('cc', '[0-9]+');//Buscar un vendedor
 Route::post('restoreVendedor','ControladorVendedor@restoreVendedor');//Obtener vendedores eliminados
 
 Route::post('registerProducto', 'ControladorProducto@registerproducto');//Registrar Producto Nuevo
@@ -38,6 +40,8 @@ Route::get('getsProducDelete', 'ControladorProducto@productosDeleteAll');//Obten
 Route::put("editProducto",'ControladorProducto@editProducto'); //editar producto
 Route::delete('deleteProducto','ControladorProducto@deleteProducto'); // Estado eliminado para producto
 Route::get('searchProducto/{id}', 'ControladorProducto@searchProducto')->where('id', '[0-9]+');//Buscar un producto
+Route::get('searchProductoC/{codigo}', 'ControladorProducto@searchProductoC')->where('codigo', '[0-9]+');
+Route::get('searchProductoE/{estado}', 'ControladorProducto@searchProductoE');
 Route::post('restoreProducto','ControladorProducto@restoreProducto');//Obtener producto eliminados
 
 Route::post('registerIngreso', 'ControladorIngreso@registerIngreso');//Registrar ingreso con productos
@@ -45,4 +49,6 @@ Route::get('getIngreso', 'ControladorIngreso@ingresosAll');//Obtener todos los i
 Route::get('getIngresoDelete', 'ControladorIngreso@ingresosDeleteAll');//Obtener todos los ingresos eliminados
 Route::delete('deleteIngreso','ControladorIngreso@deleteIngreso'); 
 Route::post('restoreIngreso','ControladorIngreso@restoreIngreso');//Restaurar ingresos eliminados
-Route::put("editIngreso",'ControladorIngreso@editIngreso'); //editar producto
+Route::put("editIngreso",'ControladorIngreso@editIngreso'); //editar ingreso
+
+Route::post('registerSalida', 'ControladorSalida@registerSalidaNormal');//Registrar ingreso con productos

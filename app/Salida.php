@@ -18,7 +18,7 @@ class Salida extends Model
     // elementos de Agreguemos el Trait SoftDeletes y la propiedad dates
     protected $dates = ['deleted_at'];   
     //indica la relación productos
-    protected $softCascade = ['productos']; 
+    //protected $softCascade = ['productos']; 
     
     //relacion inversa uno a muchos
     public function vendedor(){
@@ -29,5 +29,9 @@ class Salida extends Model
      public function productos(){// relacion - llave foranea - llave local
         return $this->hasMany('App\Producto','id_salida', 'id_salida');
     }
-
+    
+    //relacion inversa uno a muchos
+    public function ingreso(){
+        return $this->belongsto('App\ingreso','id_ingreso');
+    }
 }

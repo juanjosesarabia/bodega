@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Usuario;
 use App\Http\Requests\ControladorUsuarioRequest;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Crypt;
 
 class ControladorUsuario extends Controller
 {
@@ -23,7 +24,7 @@ class ControladorUsuario extends Controller
       }
         $cont=0;
         foreach($user as $fila) {         
-           if ($fila->correo==$correo && $fila->contrasena==$contrasena) {
+           if ($fila->correo==$correo && decrypt($fila->contrasena)==$contrasena) {
             $cont++;  //se verifica duplicidad                   
           }}       
         
@@ -58,7 +59,8 @@ class ControladorUsuario extends Controller
               $usuario->nombres = $req->input('nombres');
               $usuario->apellidos = $req->input('apellidos');
               $usuario->correo = $req->input('correo');
-              $usuario->contrasena = $req->input('contrasena');            
+              $usuario->contrasena =  encrypt($req->input('contrasena')); 
+              //$usuario->contrasena = Hash::make($req->input('contrasena')); 
               $usuario->save();
               $data =["estado"=>"ok","mensaje"=>"Usuario registrado con exito"];    
               return response($data, 200); 
@@ -178,13 +180,23 @@ class ControladorUsuario extends Controller
         $data =["estado"=>"error","mensaje"=>"No se encontraron datos"]; 
         return response($data,404);  
       }
-
-      
-
-
+    }
+      //método para buscar usuario registrado
+     public function searchUserCc($cc){
+      $user = Usuario::where('cedula',"=", $cc)->get();       
+      if(!$user->isEmpty()){   
+        
+        foreach($user as $fila){
+          $datos1 = array("id"=>$fila->id_usuario,"cedula"=>$fila->cedula,"nombres"=>$fila->nombres,"apellidos"=> $fila->apellidos,"correo"=> $fila->correo,"tipo_usuario"=>$fila->tipo_usuario);
+        }
+          return response($datos1,200);
+      }else{
+        $data =["estado"=>"error","mensaje"=>"No se encontraron datos"]; 
+        return response($data,404);  
+      } 
      }
       //método para resetear contraseña de usuario registrado
-     public function resetPassword(Request $req){
+     public function resetPasswordAd(Request $req){
         $validator = Validator::make($req->all(), [
           'id' => 'required|numeric',        
       ]);
@@ -197,7 +209,7 @@ class ControladorUsuario extends Controller
         
         if(Usuario::find($id)!=null){
           $user =  Usuario::find($id);
-          $user->contrasena = $req->input("contrasenaNueva");
+          $user->contrasena = encrypt($req->input("contrasenaNueva"));
           if(!$user->contrasena){
             $data =["estado"=>"error","mensaje"=>"Contrasena nueva esta vacía"]; 
             return response($data,404); 
@@ -211,8 +223,6 @@ class ControladorUsuario extends Controller
           $data =["estado"=>"error","mensaje"=>"Usuario no se encuentra en base de datos"]; 
           return response($data,404); 
         }
-
-
   }
   //método para cambiar el tipo de usuario registrado
       public function cambiarTipo(Request $req){

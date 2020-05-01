@@ -33,7 +33,5 @@ class Vendedor extends Model
         return $this->hasMany('App\Ingreso','id_vendedor', 'id_vendedor ');
     }
     
-    public function salidas(){
-        return $this->hasMany('App\salida','id_vendedor', 'id_vendedor ');
-    }
+    
 }

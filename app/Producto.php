@@ -13,7 +13,7 @@ class Producto extends Model
     //Asginar modelo a tabla
     protected $table = 'producto';
     //Asginar  elementos a carga masiva
-    protected $fillabe =['nombre','descripcion','codigoBarra', 'riesgo'];
+    protected $fillabe =['nombre','descripcion','codigoBarra', 'riesgo','Estado'];
     // elementos de Agreguemos el Trait SoftDeletes y la propiedad dates
     protected $dates = ['deleted_at'];
 

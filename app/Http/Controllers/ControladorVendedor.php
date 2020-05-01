@@ -148,6 +148,21 @@ class ControladorVendedor extends Controller
           $data =["estado"=>"error","mensaje"=>"No se encontraron datos"]; 
           return response($data,404);  
         }}
+
+    //método para buscar vendedor registrado
+    public function searchVendedorCc($cc){
+      $user = Vendedor::where('cedula',"=", $cc)->get(); 
+      if(!$user->isEmpty()){
+        
+          foreach ($user as $fila) {
+          $datos1 = array("id"=>$fila->id_vendedor,"cedula"=>$fila->cedula,"nombres"=>$fila->nombres,"apellidos"=> $fila->apellidos,"teléfono"=> $fila->telefono);
+        }
+        return response($datos1,200);
+      }else{
+        $data =["estado"=>"error","mensaje"=>"No se encontraron datos"]; 
+        return response($data,404);       
+      } 
+      }
   
         //método restaurar vendedor borrado
     public function restoreVendedor(Request $req){

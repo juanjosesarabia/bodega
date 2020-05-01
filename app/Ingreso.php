@@ -29,4 +29,8 @@ class Ingreso extends Model
      public function productos(){// relacion - llave foranea - llave local
         return $this->hasMany('App\Producto','id_ingreso', 'id_ingreso ');
     }
+
+    public function salidas(){
+        return $this->hasMany('App\Salida','id_ingreso', 'id_ingreso');
+    }
 }
