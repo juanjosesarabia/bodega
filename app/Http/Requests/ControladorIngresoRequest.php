@@ -47,6 +47,8 @@ class ControladorIngresoRequest extends FormRequest
                 'nombreRecibe.string' => 'La nombre de quien recibe debe ser cadena de datos',
                 'fechaIngreso.required' => 'La fecha de Ingreso es obligatoria.',
                 'fechaIngreso.date' => 'La fecha de Ingreso debe tener formato AAAA-MM-DD',
+                'numero_acta.required' => 'El número de acta  es obligatorio.',
+                'numero_acta.numeric' => 'El número acta debe ser entero ',
                 'cantidadIngresada.required' => 'La cantidad de articulos es obligatoria.',
                 'cantidadIngresada.numeric' => 'La cantidad de articulos debe ser numerica',
                 'ubicacionOperativo.required' => 'La ubicación del operativo debe ser obligatoria.',

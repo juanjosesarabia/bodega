@@ -53,7 +53,8 @@ class ControladorProductoRequest extends FormRequest
                 'id_vendedor.numeric' => 'El id del vendedor debe ser númerico',
                 'riesgo.required' => 'El riesgo es obligatorio.',
                 'riesgo.string' => 'El riesgo debe ser una cadena de datos',
-
+                'cantidadUnitaria.required'=>'La cantidad unitaria es obligatorio',
+                'cantidadUnitaria.numeric'=>'La cantidad unitaria debe ser númerico'
             ];
         }
     public function rules()
@@ -61,9 +62,10 @@ class ControladorProductoRequest extends FormRequest
         return [            
             'nombre' => 'required|string',            
             'descripcion' => 'required|string',
-            'codigoBarra' => 'required|string',
+            'codigoBarra' => 'required|numeric',
             'id_vendedor' => 'required|numeric',
-            'riesgo'=>'required|string'             
+            'riesgo'=>'required|string',
+            'cantidadUnitaria'=>'required|numeric'             
         ];
     }
     

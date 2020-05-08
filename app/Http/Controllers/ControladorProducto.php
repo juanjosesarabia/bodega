@@ -21,7 +21,9 @@ class ControladorProducto extends Controller
         $producto->descripcion = $req->input('descripcion');
         $producto->codigoBarra = $req->input('codigoBarra');
         $producto->id_vendedor = $req->input('id_vendedor'); 
-        $producto->riesgo = $req->input('riesgo');        
+        $producto->riesgo = $req->input('riesgo'); 
+        $producto->cantidadUnitaria= $req->input('cantidadUnitaria');
+        
         
         
         if(!$producto->save()){
@@ -44,7 +46,7 @@ class ControladorProducto extends Controller
           return response($data,404);        
         }else{
           foreach($pro as $fila) { 
-            $datos1 = array("id"=>$fila->id_producto,"nombre"=>$fila->nombre,"descripcion"=>$fila->descripcion,"codigo de barra"=> $fila->codigoBarra,"Riesgo"=> $fila->riesgo);   
+            $datos1 = array("id"=>$fila->id_producto,"nombre"=>$fila->nombre,"descripcion"=>$fila->descripcion,"codigo de barra"=> $fila->codigoBarra,'Cantidad Unitaria'=>$fila->cantidadUnitaria,"Riesgo"=> $fila->riesgo);   
             array_push($datos, $datos1);                            
            }
           return response($datos, 200);        
@@ -57,7 +59,7 @@ class ControladorProducto extends Controller
         $users = DB::table('producto')
             ->join('vendedor', 'vendedor.id_vendedor', '=', 'producto.id_vendedor') 
             ->join('ingreso', 'ingreso.id_ingreso', '=', 'producto.id_ingreso')           
-            ->select('producto.id_producto','producto.nombre','producto.codigoBarra','producto.riesgo','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos','vendedor.telefono','ingreso.fechaIngreso','ingreso.numero_acta')
+            ->select('producto.id_producto','producto.nombre','producto.codigoBarra','producto.cantidadUnitaria','producto.riesgo','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos','vendedor.telefono','ingreso.fechaIngreso','ingreso.numero_acta')
             ->where("producto.deleted_at","=",null )
             ->get();
 
@@ -85,15 +87,30 @@ class ControladorProducto extends Controller
               $data =["estado"=>"error","mensaje"=>"No se encontró dato de producto a modificar"]; 
               return response($data,404);        
         }else{   
+
+            $produc=producto::withTrashed()->where("id_producto","!=",$id)->get();
             $producto = Producto::find($id);             
             $producto->nombre = $req->input('nombre');
             $producto->descripcion = $req->input('descripcion');
             $producto->codigoBarra = $req->input('codigoBarra');
+            $producto->cantidadUnitaria= $req->input('cantidadUnitaria');
             $producto->id_vendedor = $req->input('id_vendedor'); 
-            $producto->riesgo = $req->input('riesgo');                                      
-            $producto->save();
-            $data =["estado"=>"ok","mensaje"=>"Vendedor modificado con exito"];    
-            return response($data, 200); 
+            $producto->riesgo = $req->input('riesgo');  
+             $cont=0;
+            foreach($produc as $fila) {         
+              if ($fila->codigoBarra==$producto->codigoBarra ) {
+                $cont++;  //se verifica duplicidad           
+              }}
+            if($cont==0){
+              $producto->save();
+              $data =["estado"=>"ok","mensaje"=>"Producto modificado con exito"];    
+              return response($data, 200);
+            }else{
+              $data =["estado"=>"error","mensaje"=>" Código de barra ya esta registrado"]; 
+              return response($data,401); 
+            }
+
+             
         } 
     }  
     
@@ -125,7 +142,7 @@ class ControladorProducto extends Controller
       public function productosDeleteAll(){
         $users = DB::table('producto')
             ->join('vendedor', 'vendedor.id_vendedor', '=', 'producto.id_vendedor')           
-            ->select('producto.id_producto','producto.nombre','producto.codigoBarra','producto.riesgo','producto.deleted_at','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos','vendedor.telefono')
+            ->select('producto.id_producto','producto.nombre','producto.codigoBarra','producto.cantidadUnitaria','producto.riesgo','producto.deleted_at','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos','vendedor.telefono')
             ->where("producto.deleted_at","!=",null)
             ->get();
 
@@ -142,7 +159,7 @@ class ControladorProducto extends Controller
     public function searchProducto($id){
         if(Producto::find($id)){
             $user = Producto::find($id);
-            $datos1 = array("id"=>$user->id_producto,"nombres"=>$user->nombre,"descripcion"=>$user->descripcion,"Codigo Barra"=> $user->codigoBarra);
+            $datos1 = array("id"=>$user->id_producto,"nombres"=>$user->nombre,"descripcion"=>$user->descripcion,"Codigo Barra"=> $user->codigoBarra,"Cantidad Unitaria"=>$user->cantidadUnitaria);
             return response($datos1,200);
         }else{
           $data =["estado"=>"error","mensaje"=>"No se encontraron datos"]; 
@@ -154,7 +171,7 @@ class ControladorProducto extends Controller
             $pro  = DB::table('producto')
             ->join('vendedor', 'vendedor.id_vendedor', '=', 'producto.id_vendedor') 
             ->join('ingreso', 'ingreso.id_ingreso', '=', 'producto.id_ingreso')           
-            ->select('producto.id_producto','producto.nombre','producto.codigoBarra','producto.riesgo','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos','vendedor.telefono','ingreso.fechaIngreso','ingreso.numero_acta')
+            ->select('producto.id_producto','producto.nombre','producto.codigoBarra','producto.cantidadUnitaria','producto.riesgo','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos','vendedor.telefono','ingreso.fechaIngreso','ingreso.numero_acta')
             ->where('codigoBarra',"=", $codigo)
             ->where("producto.deleted_at","=",null )
             ->get();
@@ -172,7 +189,7 @@ class ControladorProducto extends Controller
             $pro  = DB::table('producto')
             ->join('vendedor', 'vendedor.id_vendedor', '=', 'producto.id_vendedor') 
             ->join('ingreso', 'ingreso.id_ingreso', '=', 'producto.id_ingreso')           
-            ->select('producto.id_producto','producto.nombre','producto.codigoBarra','producto.riesgo','producto.Estado','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos','vendedor.telefono','ingreso.fechaIngreso','ingreso.numero_acta')
+            ->select('producto.id_producto','producto.nombre','producto.codigoBarra','producto.cantidadUnitaria','producto.riesgo','producto.Estado','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos','vendedor.telefono','ingreso.fechaIngreso','ingreso.numero_acta')
             ->where('Estado',"=", $estado)
             ->where("producto.deleted_at","=",null )
             ->get();

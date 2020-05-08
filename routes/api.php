@@ -46,6 +46,7 @@ Route::post('restoreProducto','ControladorProducto@restoreProducto');//Obtener p
 
 Route::post('registerIngreso', 'ControladorIngreso@registerIngreso');//Registrar ingreso con productos
 Route::get('getIngreso', 'ControladorIngreso@ingresosAll');//Obtener todos los ingresos
+Route::get('getIngreSolo', 'ControladorIngreso@ingresosAllSolo');//Obtener todos los ingresos
 Route::get('getIngresoDelete', 'ControladorIngreso@ingresosDeleteAll');//Obtener todos los ingresos eliminados
 Route::delete('deleteIngreso','ControladorIngreso@deleteIngreso'); 
 Route::post('restoreIngreso','ControladorIngreso@restoreIngreso');//Restaurar ingresos eliminados
