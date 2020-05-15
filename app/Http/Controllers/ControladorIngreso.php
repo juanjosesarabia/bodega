@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Ingreso;
 use App\Producto;
+use App\Vendedor;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\ControladorIngresoRequest;
@@ -40,6 +41,22 @@ class ControladorIngreso extends Controller
               if(!is_string($fila['nombre'])|| !$fila['nombre']||!is_string($fila['descripcion'])||!$fila['descripcion']||!is_numeric($fila['codigoBarra'])||!$fila['codigoBarra']||!is_numeric($fila['id_vendedor'])||!$fila['id_vendedor']||!is_numeric($fila['cantidadUnitaria'])||!$fila['cantidadUnitaria']||!is_string($fila['riesgo'])|| !$fila['riesgo']){
                 $cont1++;         
               }}   
+         /////////////////////////
+
+         $vend = Vendedor::get(); // se obtiene todos los objetos de la BD       
+        //codigo de barra unico con respecto al json a ingresar y los que estan en BD
+        $cont6=0;
+        foreach($vend as $fila) {          
+           if ($fila->id_vendedor==$ingreso->id_vendedor) {
+              $cont6++;  //se verifica duplicidad                   
+          } 
+        }
+
+        if($cont6==0){
+          $data =["estado"=>"error","mensaje"=>"El vendedor no se encuentra registrado"];    
+            return response($data, 402); 
+        }
+
         //////////////////////////
 
         $prod = Producto::withTrashed()->get(); // se obtiene todos los objetos de la BD       
@@ -139,7 +156,7 @@ class ControladorIngreso extends Controller
           $users = DB::table('producto')
           ->join('vendedor', 'vendedor.id_vendedor', '=', 'producto.id_vendedor')  
           ->join('ingreso', 'ingreso.id_ingreso', '=', 'producto.id_ingreso')
-          ->select('ingreso.id_ingreso','ingreso.nombreRecibe','ingreso.fechaIngreso','ingreso.numero_acta','ingreso.cantidadIngresada','ingreso.ubicacionOperativo','producto.id_producto','producto.nombre','producto.codigoBarra','producto.cantidadUnitaria','producto.riesgo','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos','vendedor.telefono')
+          ->select('ingreso.id_ingreso','ingreso.cedulaNombreRecibe','ingreso.nombreRecibe','ingreso.fechaIngreso','ingreso.numero_acta','ingreso.cantidadIngresada','ingreso.ubicacionOperativo','producto.id_producto','producto.nombre','producto.codigoBarra','producto.cantidadUnitaria','producto.riesgo','vendedor.id_vendedor','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos','vendedor.telefono')
           ->where("producto.deleted_at","=",null )
           ->where("ingreso.deleted_at","=",null )
           ->where("vendedor.deleted_at","=",null )
@@ -158,7 +175,7 @@ class ControladorIngreso extends Controller
          
       $users = DB::table('vendedor')
       ->join('ingreso', 'ingreso.id_vendedor', '=', 'vendedor.id_vendedor')  
-      ->select('ingreso.id_ingreso','ingreso.nombreRecibe','ingreso.fechaIngreso','ingreso.numero_acta','ingreso.cantidadIngresada','ingreso.ubicacionOperativo','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos','vendedor.telefono')
+      ->select('ingreso.id_ingreso','ingreso.cedulaNombreRecibe','ingreso.nombreRecibe','ingreso.fechaIngreso','ingreso.numero_acta','ingreso.cantidadIngresada','ingreso.ubicacionOperativo','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos','vendedor.telefono')
       ->where("ingreso.deleted_at","=",null )
       
       ->get();
@@ -177,7 +194,7 @@ class ControladorIngreso extends Controller
       $users = DB::table('producto')
       ->join('vendedor', 'vendedor.id_vendedor', '=', 'producto.id_vendedor')  
       ->join('ingreso', 'ingreso.id_ingreso', '=', 'producto.id_ingreso')
-      ->select('ingreso.id_ingreso','ingreso.nombreRecibe','ingreso.fechaIngreso','ingreso.numero_acta','ingreso.cantidadIngresada','ingreso.ubicacionOperativo','producto.id_producto','producto.nombre','producto.codigoBarra','producto.cantidadUnitaria','producto.riesgo','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos','vendedor.telefono')
+      ->select('ingreso.id_ingreso','ingreso.cedulaNombreRecibe', 'ingreso.nombreRecibe','ingreso.fechaIngreso','ingreso.numero_acta','ingreso.cantidadIngresada','ingreso.ubicacionOperativo','producto.id_producto','producto.nombre','producto.codigoBarra','producto.cantidadUnitaria','producto.riesgo','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos','vendedor.telefono')
       ->where("ingreso.deleted_at","!=",null )
       
       ->get();
@@ -279,4 +296,19 @@ class ControladorIngreso extends Controller
       } 
   }  
      
+    /// metodo para buscar ingreso por numero de acta
+    public function searchIngreso($acta){           
+      $pro  = DB::table('ingreso')          
+      ->select('id_ingreso','cedulaNombreRecibe','nombreRecibe','fechaIngreso','numero_acta','cantidadIngresada','ubicacionOperativo')
+      ->where('numero_acta',"=", $acta)
+      ->where("deleted_at","=",null )
+      ->get();
+      
+    if(!$pro->isEmpty()){        
+      return response($pro,200);
+                        
+      }else{
+        $data =["estado"=>"error","mensaje"=>"No se encontraron datos"]; 
+        return response($data,404);  
+      }}
 }

@@ -23,7 +23,6 @@ Route::delete('deleteUser','ControladorUsuario@deletetUser'); // Estado eliminad
 Route::get('getUserDelete','ControladorUsuario@userAllDelete');//obtener usuarios eliminados
 Route::post('restoreUser','ControladorUsuario@restoreUser');//restaurar los usuarios borrados
 
-
 Route::post('registerVendedor', 'ControladorVendedor@registerVendedor');//Registrar Vendedor Nuevo
 Route::get('getVendedores', 'ControladorVendedor@vendedoresAll');//Obtener Vendedores sin eliminar
 Route::put("editVendedor",'ControladorVendedor@editVendedor'); //editar vendedor
@@ -45,11 +44,22 @@ Route::get('searchProductoE/{estado}', 'ControladorProducto@searchProductoE');
 Route::post('restoreProducto','ControladorProducto@restoreProducto');//Obtener producto eliminados
 
 Route::post('registerIngreso', 'ControladorIngreso@registerIngreso');//Registrar ingreso con productos
-Route::get('getIngreso', 'ControladorIngreso@ingresosAll');//Obtener todos los ingresos
-Route::get('getIngreSolo', 'ControladorIngreso@ingresosAllSolo');//Obtener todos los ingresos
+Route::get('getIngreso', 'ControladorIngreso@ingresosAll');//Obtener todos los ingresos individuales
+Route::get('getIngreSolo', 'ControladorIngreso@ingresosAllSolo');//Obtener todos los ingresos unitarios
 Route::get('getIngresoDelete', 'ControladorIngreso@ingresosDeleteAll');//Obtener todos los ingresos eliminados
-Route::delete('deleteIngreso','ControladorIngreso@deleteIngreso'); 
+Route::delete('deleteIngreso','ControladorIngreso@deleteIngreso'); //Eliminar ingreso
 Route::post('restoreIngreso','ControladorIngreso@restoreIngreso');//Restaurar ingresos eliminados
 Route::put("editIngreso",'ControladorIngreso@editIngreso'); //editar ingreso
+Route::get('searchIngreso/{acta}', 'ControladorIngreso@searchIngreso')->where('acta', '[0-9]+');//Buscar ingreso por acta
 
-Route::post('registerSalida', 'ControladorSalida@registerSalidaNormal');//Registrar ingreso con productos
+Route::post('registerSalida', 'ControladorSalida@registerSalidaNormal');//Registrar salida productos sin riesgo
+Route::post('registerSalidaRiesgo', 'ControladorSalida@registerSalidaRiesgo');// Registrar salida Riesgo
+Route::get('getSalida', 'ControladorSalida@salidaAll'); //Obtener todos los datos de salida
+Route::get('getSalidaNormal', 'ControladorSalida@salidaNormal'); //Obtener salida de productos normales
+Route::get('getSalidaRiesgo', 'ControladorSalida@salidaRiesgo'); //Obtener salida de productos con riesgo
+Route::get('getSalidaDelete', 'ControladorSalida@salidaDeleteAll'); //obtener salida eliminada
+Route::put('aprobarSalidaN', 'ControladorSalida@aprobarSalidaNormal'); //Aprobar Salida Normal
+Route::put('aprobarSalidaR', 'ControladorSalida@aprobarSalidaRiesgo'); //Aprobar Salida Riesgo
+Route::delete('deleteSalida','ControladorSalida@deleteSalida'); //Eliminar ingreso
+Route::post('restoreSalida','ControladorSalida@restoreSalida'); //Eliminar ingreso
+Route::get('searchSalida/{fecha}', 'ControladorSalida@searchSalida');

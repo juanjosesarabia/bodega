@@ -14,7 +14,7 @@ class Salida extends Model
     //Asignar modelo a tabla
     protected $table = 'salida'; 
     //Asginar elementos a carga masiva
-    protected $fillable =['cedulaNombreRetira','nombreRetira','salidaAprobada','fechaSalida','cedulaNombreOficiaSalida','nombreOficiaSalida',"cantidadRetirada"];
+    protected $fillable =['cedulaNombreRetira','nombreRetira','salidaAprobada','fechaSalida','cedulaNombreOficiaSalida','nombreOficiaSalida',"cantidadRetirada","datoSalida"];
     // elementos de Agreguemos el Trait SoftDeletes y la propiedad dates
     protected $dates = ['deleted_at'];   
     //indica la relación productos
