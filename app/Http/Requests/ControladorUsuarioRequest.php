@@ -30,10 +30,9 @@ class ControladorUsuarioRequest extends FormRequest
     {
         return [           
             'cedula' => 'cedula',            
-            'nombres' => 'nombres',
-            'apellidos' => 'apellidos',
-            'correo' => 'correo',
-            'contrasena'=>'contrasena'     
+            'name' => 'name',            
+            'email' => 'email',
+            'password'=>'password'     
         ];
     }
     
@@ -44,14 +43,12 @@ class ControladorUsuarioRequest extends FormRequest
             return [
                 'cedula.required' => 'La cédula es obligatorio.',
                 'cedula.numeric' => 'La cédula debe ser numérica',
-                'nombres.required' => 'El nombre es obligatorio.',
-                'nombres.string' => 'El nombre  debe ser cadena de datos',
-                'apellidos.required' => 'El apellido es obligatorio.',
-                'apellidos.string' => 'El apellido  debe ser cadena de datos',
-                'correo.required' => 'El correo es obligatorio.',
-                'correo.regex' => 'No corresponde a un correo válido',
-                'contrasena.required' => 'La contrasena es obligatorio.',
-                'contrasena.string' => 'No contrasena debe ser una cadena de datos',
+                'name.required' => 'El nombre es obligatorio.',
+                'name.string' => 'El nombre  debe ser cadena de datos',              
+                'email.required' => 'El correo es obligatorio.',
+                'email.regex' => 'No corresponde a un correo válido',
+                'password.required' => 'La contrasena es obligatorio.',
+                'password.string' => 'No contrasena debe ser una cadena de datos',
 
             ];
         }
@@ -59,10 +56,9 @@ class ControladorUsuarioRequest extends FormRequest
     {
         return [
             'cedula' => 'required|numeric',            
-            'nombres' => 'required|string',
-            'apellidos' => 'required|string',
-            'correo' => 'required|regex:/^.+@.+$/i',
-            'contrasena'=>'required|string'            
+            'name' => 'required|string',         
+            'email' => 'required|regex:/^.+@.+$/i',
+            'password'=>'required|string'            
         ];
     }
     

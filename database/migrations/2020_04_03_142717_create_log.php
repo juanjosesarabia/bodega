@@ -19,7 +19,7 @@ class CreateLog extends Migration
             $table->string('descripcion', 500);
             $table->date('fecha');
             $table->bigInteger('id_usuario')->unsigned();
-            $table->foreign('id_usuario')->references('id_usuario')->on('usuario')->onDelete('cascade');
+            $table->foreign('id_usuario')->references('id')->on('users')->onDelete('cascade');
             $table->softDeletes();
             $table->timestamps();
         });
