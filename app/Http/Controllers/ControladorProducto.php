@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use App\Log;
+use Illuminate\Support\Facades\Auth; 
 use App\Producto;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -31,6 +32,12 @@ class ControladorProducto extends Controller
             return response($data, 402); 
          }else{
             $producto->save();
+             //Log registrar producto
+             $log =  new Log; 
+             $usuario = Auth::user();  
+             $log->descripcion= "Producto : ".$producto->nombre." con codigo de barra ".$producto->codigoBarra ." registrado por : ".$usuario->name; 
+             $log->id_usuario= $usuario ->id ; 
+             $log->save(); 
             $data =["estado"=>"ok","mensaje"=>"Los productos se registraron exitosamente"];    
             return response($data, 200);  
          }                 
@@ -103,6 +110,12 @@ class ControladorProducto extends Controller
               }}
             if($cont==0){
               $producto->save();
+              //Log editar producto
+             $log =  new Log; 
+             $usuario = Auth::user();  
+             $log->descripcion= "Producto : ".$producto->nombre." con codigo de barra ".$producto->codigoBarra ."fue editado por : ".$usuario->name; 
+             $log->id_usuario= $usuario ->id ; 
+             $log->save(); 
               $data =["estado"=>"ok","mensaje"=>"Producto modificado con exito"];    
               return response($data, 200);
             }else{
@@ -133,6 +146,12 @@ class ControladorProducto extends Controller
             return response($data,404);
             }else{
             $user->delete();
+            //Log eliminar producto
+            $log =  new Log; 
+            $usuario = Auth::user();  
+            $log->descripcion= "Producto : ".$user->nombre." con codigo de barra ".$user->codigoBarra ." fue eliminado por : ".$usuario->name; 
+            $log->id_usuario= $usuario ->id ; 
+            $log->save(); 
             $data =["estado"=>"ok","mensaje"=>"Producto eliminado exitosamente"];            
             return response($data,200);
             }     
@@ -218,6 +237,12 @@ class ControladorProducto extends Controller
         
           if($user && $user->deleted_at !=null){//verifica que el usuario cumpla las condciones         
           Producto::onlyTrashed()->find($id)->restore();
+          //Log restaurar producto
+          $log =  new Log; 
+          $usuario = Auth::user();  
+          $log->descripcion= "Producto : ".$user->nombre." con codigo de barra ".$user->codigoBarra ." fue restaurado por : ".$usuario->name; 
+          $log->id_usuario= $usuario ->id ; 
+          $log->save(); 
           $data =["estado"=>"ok","mensaje"=>"Producto restaurado con exito"]; 
           return response($data,200);
         

@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller; 
 use App\User; 
+use App\Log;
 use App\Http\Requests\ControladorUsuarioRequest;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
@@ -28,11 +28,16 @@ class UsuarioPrueba extends Controller
                 $data =["estado"=>"error","mensaje"=>"No tienes aprobación de usuario Administrador"];            
                 return response($data,401);
             }else{
-            $datos["name"] =$user->name;
-            $datos["tipo"] =$user->tipo_usuario;
-            $success['token'] =  $user->createToken('SISCONI')-> accessToken; 
-            $data =["estado"=>"ok","mensaje"=>"Acceso Concedido",'datos'=>$datos,'success' => $success];            
-            return response($data,200); 
+              $datos["name"] =$user->name;
+              $datos["tipo"] =$user->tipo_usuario;
+              $success['token'] =  $user->createToken('SISCONI')-> accessToken; 
+              $data =["estado"=>"ok","mensaje"=>"Acceso Concedido",'datos'=>$datos,'success' => $success]; 
+              //Ingreso en sistema
+              $log =  new Log;   
+              $log->descripcion= "Ingreso al sistema usuario : ".$user->name ; 
+              $log->id_usuario= $user->id ; 
+              $log->save();                  
+              return response($data,200); 
              }
         }else{ 
             $data =["estado"=>"error","mensaje"=>"Credenciales invalidas"];            
@@ -119,6 +124,12 @@ class UsuarioPrueba extends Controller
                 $user->email = $req->input('email');
                 $user->password =  bcrypt($req->input('password'));             
                 $user->save();
+                //Log Editar usuario
+                $log =  new Log; 
+                $usuario = Auth::user();  
+                $log->descripcion= "Usuario : ".$user->cedula." ".$user->name." editado por : ".$usuario->name; 
+                $log->id_usuario= $usuario ->id ; 
+                $log->save();  
                 $data =["estado"=>"ok","mensaje"=>"Usuario modificado con exito"];    
                 return response($data, 200);   
               }else{
@@ -147,6 +158,12 @@ class UsuarioPrueba extends Controller
           $data =["estado"=>"error","mensaje"=>"Usuario  no se encuentra  registrado base de datos"];            
           return response($data,404);
         }else{
+          //Log Eliminar usuario
+          $log =  new Log; 
+          $usuario = Auth::user();  
+          $log->descripcion= "Usuario : ".$user->cedula."  ".$user->name ." eliminado por: ".$usuario->name;  
+          $log->id_usuario= $usuario->id ; 
+          $log->save(); 
           $user->delete();
           $data =["estado"=>"ok","mensaje"=>"Usuario eliminado exitosamente"];            
           return response($data,200);
@@ -218,6 +235,12 @@ class UsuarioPrueba extends Controller
             $data =["estado"=>"error","mensaje"=>"Contrasena nueva esta vacía"]; 
             return response($data,404); 
           }else{
+            //Log cambiar tipo de usuario
+            $log =  new Log; 
+            $usuario = Auth::user();  
+            $log->descripcion= " Cambio de contraseña de usuario: ".$user->name." realizado por ".$usuario->name; 
+            $log->id_usuario= $usuario->id ; 
+            $log->save();
             $user->save();
             $data =["estado"=>"ok","mensaje"=>"Contraseña modificado con exito"];    
             return response($data, 200);}
@@ -252,7 +275,13 @@ class UsuarioPrueba extends Controller
               $data =["estado"=>"error","mensaje"=>"Tipo de usuario  a guardar esta vacío o no es una cadena"];            
               return response($data,404);                  
           }else{
-                $user->save();
+            //Log cambiar tipo de usuario
+              $log =  new Log; 
+              $usuario = Auth::user();  
+              $log->descripcion= " Usuario :".$user->cedula." : ".$user->name." fue cambiado su tipo por: ".$usuario->name; 
+              $log->id_usuario= $usuario->id ; 
+              $log->save(); 
+              $user->save();
               $data =["estado"=>"ok","mensaje"=>"Tipo de usuario modificado con exito"];    
               return response($data, 200);
             }            
@@ -277,8 +306,14 @@ class UsuarioPrueba extends Controller
         $id =  $req->input('id'); 
         $user =User::onlyTrashed()->find($id); 
         
-          if($user && $user->deleted_at !=null){//verifica que el usuario cumpla las condciones         
+        if($user && $user->deleted_at !=null){//verifica que el usuario cumpla las condciones         
           User::onlyTrashed()->find($id)->restore();
+          //Log Restaurar usuario
+          $log =  new Log; 
+          $usuario = Auth::user();  
+          $log->descripcion= "Usuario : ".$user->cedula." ".$user->name ." restaurado por: ".$usuario->name; 
+          $log->id_usuario= $usuario->id ; 
+          $log->save(); 
           $data =["estado"=>"ok","mensaje"=>"Usuario restaurado con exito"]; 
           return response($data,200);
         

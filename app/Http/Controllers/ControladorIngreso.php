@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Ingreso;
 use App\Producto;
 use App\Vendedor;
+use App\Log;
+use Illuminate\Support\Facades\Auth; 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\ControladorIngresoRequest;
@@ -111,7 +113,14 @@ class ControladorIngreso extends Controller
                 $ingreso->save();
                 $datos= $req->input('data');
                 $ultimoIngreso= Ingreso::get()->last();            
-                $verificacion=$this->registerProducto($datos,$ultimoIngreso->id_ingreso);//////////                                             
+                $verificacion=$this->registerProducto($datos,$ultimoIngreso->id_ingreso);//////////   
+                
+                //Log ingreso registrado
+                $log =  new Log; 
+                $usuario = Auth::user();  
+                $log->descripcion= "Ingreso con número de acta: ". $ingreso->numero_acta." con cantidad  total de: ".$ingreso->cantidadIngresada ." fue realizado por : ".$usuario->name; 
+                $log->id_usuario= $usuario ->id ; 
+                $log->save(); 
             
                 $data =["estado"=>"ok","mensaje"=>"El ingreso se registro exitosamente"];    
                 return response($data, 200); 
@@ -224,9 +233,15 @@ class ControladorIngreso extends Controller
           $data =["estado"=>"error","mensaje"=>"El ingreso  no se encuentra en registrado base de datos"];            
           return response($data,404);
           }else{
-          $user->delete();
-          $data =["estado"=>"ok","mensaje"=>"Ingreso eliminado exitosamente"];            
-          return response($data,200);
+            $user->delete();
+            //Log ingreso eliminado
+            $log =  new Log; 
+            $usuario = Auth::user();  
+            $log->descripcion= "Ingreso con número de acta: ". $user->numero_acta." con cantidad  total de: ".$user->cantidadIngresada ." fue eliminado por : ".$usuario->name; 
+            $log->id_usuario= $usuario ->id ; 
+            $log->save();
+            $data =["estado"=>"ok","mensaje"=>"Ingreso eliminado exitosamente"];            
+            return response($data,200);
           }     
  }
 
@@ -245,6 +260,12 @@ class ControladorIngreso extends Controller
         
           if($user && $user->deleted_at !=null){//verifica que el usuario cumpla las condciones         
           Ingreso::onlyTrashed()->find($id)->restore();
+          //Log ingreso restaurado
+          $log =  new Log; 
+          $usuario = Auth::user();  
+          $log->descripcion= "Ingreso con número de acta: ". $user->numero_acta." con cantidad  total de: ".$user->cantidadIngresada ." fue restaurado por : ".$usuario->name; 
+          $log->id_usuario= $usuario ->id ; 
+          $log->save();
           $data =["estado"=>"ok","mensaje"=>"Producto restaurado con exito"]; 
           return response($data,200);
         
@@ -285,6 +306,12 @@ class ControladorIngreso extends Controller
           }}
           
           if($cont==0){
+            //Log ingreso modificado
+            $log =  new Log; 
+            $usuario = Auth::user();  
+            $log->descripcion= "Ingreso con número de acta: ". $ingreso->numero_acta." con cantidad  total de: ".$ingreso->cantidadIngresada ." fue editado por : ".$usuario->name; 
+            $log->id_usuario= $usuario ->id ; 
+            $log->save();
             $ingreso->save();
             $data =["estado"=>"ok","mensaje"=>"Ingreso modificado con exito"];    
             return response($data, 200);

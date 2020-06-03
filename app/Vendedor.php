@@ -20,7 +20,7 @@ class Vendedor extends Model
     protected $dates = ['deleted_at'];
 
      //indica la relación productos(), ingresos(), salidas()
-     protected $softCascade = ['productos','ingresos','salidas'];
+     protected $softCascade = ['productos','ingresos'];
       
     
 

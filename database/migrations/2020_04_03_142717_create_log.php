@@ -17,7 +17,6 @@ class CreateLog extends Migration
             $table->engine = 'InnoDB';
             $table->bigIncrements('id_log');
             $table->string('descripcion', 500);
-            $table->date('fecha');
             $table->bigInteger('id_usuario')->unsigned();
             $table->foreign('id_usuario')->references('id')->on('users')->onDelete('cascade');
             $table->softDeletes();

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\ControladorVendedorRequest;
 use App\Vendedor;
+use App\Log;
+use Illuminate\Support\Facades\Auth; 
 use Illuminate\Support\Facades\Validator;
 
 class ControladorVendedor extends Controller
@@ -32,6 +34,12 @@ class ControladorVendedor extends Controller
                     $vendedor->apellidos = $req->input('apellidos');
                     $vendedor->telefono = $req->input('telefono');            
                     $vendedor->save();
+                     //Log Editar vendedor
+                    $log =  new Log; 
+                    $usuario = Auth::user();  
+                    $log->descripcion= "Vendedor : ".$vendedor->cedula." ".$vendedor->nombres." registrado por : ".$usuario->name; 
+                    $log->id_usuario= $usuario ->id ; 
+                    $log->save(); 
                     $data =["estado"=>"ok","mensaje"=>"Vendedor registrado con exito"];    
                     return response($data, 200);  
             }              
@@ -87,6 +95,12 @@ class ControladorVendedor extends Controller
                 $user->apellidos = $req->input('apellidos');
                 $user->telefono = $req->input('telefono');                         
                 $user->save();
+                 //Log Editar vendedor
+                 $log =  new Log; 
+                 $usuario = Auth::user();  
+                 $log->descripcion= "Vendedor : ".$user->cedula." ".$user->nombres." ".$user->apellidos." editado por : ".$usuario->name; 
+                 $log->id_usuario= $usuario ->id ; 
+                 $log->save(); 
                 $data =["estado"=>"ok","mensaje"=>"Vendedor modificado con exito"];    
                 return response($data, 200);   
               }else{
@@ -114,6 +128,12 @@ class ControladorVendedor extends Controller
             return response($data,404);
             }else{
             $user->delete();
+            //Log Eliminar vendedor
+            $log =  new Log; 
+            $usuario = Auth::user();  
+            $log->descripcion= "Vendedor : ".$user->cedula." ".$user->nombres." ".$user->apellidos." eliminado por : ".$usuario->name; 
+            $log->id_usuario= $usuario ->id ; 
+            $log->save(); 
             $data =["estado"=>"ok","mensaje"=>"Vendedor eliminado exitosamente"];            
             return response($data,200);
       
@@ -179,7 +199,15 @@ class ControladorVendedor extends Controller
         
           if($user && $user->deleted_at !=null){//verifica que el usuario cumpla las condciones         
           Vendedor::onlyTrashed()->find($id)->restore();
-          $data =["estado"=>"ok","mensaje"=>"Usuario restaurado con exito"]; 
+
+          //Log Restaurar vendedor
+          $log =  new Log; 
+          $usuario = Auth::user();  
+          $log->descripcion= "Vendedor : ".$user->cedula." ".$user->nombres." ".$user->apellidos." restaurado por : ".$usuario->name; 
+          $log->id_usuario= $usuario ->id ; 
+          $log->save(); 
+          
+          $data =["estado"=>"ok","mensaje"=>"Vendedor restaurado con exito"]; 
           return response($data,200);
         
         }else{
