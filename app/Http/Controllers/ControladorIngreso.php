@@ -16,14 +16,23 @@ class ControladorIngreso extends Controller
     //método para registrar ingreso
     public function registerIngreso(ControladorIngresoRequest $req){
         $ingreso =  new Ingreso; //instancia del modelo       
-                
-        $ingreso->cedulaNombreRecibe = $req->input('cedulaNombreRecibe');
-        $ingreso->nombreRecibe = $req->input('nombreRecibe');
+        $usuario = Auth::user(); //quien hace la peticion
+        $ingreso->cedulaNombreRecibe =  $usuario->cedula;
+        $ingreso->nombreRecibe =  $usuario->name;
         $ingreso->fechaIngreso = $req->input('fechaIngreso');
         $ingreso->numero_acta = $req->input('numero_acta');  
         $ingreso->cantidadIngresada = $req->input('cantidadIngresada');  
         $ingreso->ubicacionOperativo = $req->input('ubicacionOperativo');  
         $ingreso->id_vendedor = $req->input('id_vendedor');
+
+        $validator = Validator::make($req->all(), [
+          'cantidadIngresada' => 'required|numeric',        
+         ]);
+  
+        if ($validator->fails()) {
+            $data =["estado"=>"error","mensaje"=>"Cantidad total del ingresto esta vacía o no es numerica"];            
+            return response($data,404);                  
+         }
 
         $ing = Ingreso::withTrashed()->get(); // se obtiene todos los objetos de la BD       
         
@@ -40,7 +49,7 @@ class ControladorIngreso extends Controller
           $datos= $req->input('data');
           $cont1 =0;
            foreach($datos as $fila) {  //validar datos
-              if(!is_string($fila['nombre'])|| !$fila['nombre']||!is_string($fila['descripcion'])||!$fila['descripcion']||!is_numeric($fila['codigoBarra'])||!$fila['codigoBarra']||!is_numeric($fila['id_vendedor'])||!$fila['id_vendedor']||!is_numeric($fila['cantidadUnitaria'])||!$fila['cantidadUnitaria']||!is_string($fila['riesgo'])|| !$fila['riesgo']){
+              if(!is_string($fila['nombre'])|| !$fila['nombre']||!is_string($fila['descripcion'])||!$fila['descripcion']||!is_numeric($fila['codigoBarra'])||!$fila['codigoBarra']||!is_numeric($fila['cantidadUnitaria'])||!$fila['cantidadUnitaria']||!is_string($fila['riesgo'])|| !$fila['riesgo']){
                 $cont1++;         
               }}   
          /////////////////////////
@@ -113,7 +122,7 @@ class ControladorIngreso extends Controller
                 $ingreso->save();
                 $datos= $req->input('data');
                 $ultimoIngreso= Ingreso::get()->last();            
-                $verificacion=$this->registerProducto($datos,$ultimoIngreso->id_ingreso);//////////   
+                $verificacion=$this->registerProducto($datos,$ultimoIngreso->id_ingreso,$ingreso->id_vendedor);//////////   
                 
                 //Log ingreso registrado
                 $log =  new Log; 
@@ -131,14 +140,14 @@ class ControladorIngreso extends Controller
      } 
 
 
-     protected function registerProducto($data, $id_ingreso){
+     protected function registerProducto($data, $id_ingreso,$vendedor){
              
         foreach($data as $fila) {    
            $producto =  new Producto;  
             $producto->nombre = $fila['nombre'];           
             $producto->descripcion = $fila['descripcion'];
             $producto->codigoBarra = $fila['codigoBarra'];
-            $producto->id_vendedor = $fila['id_vendedor'];
+            $producto->id_vendedor = $vendedor;
             $producto->id_ingreso = $id_ingreso;
             $producto->cantidadUnitaria=$fila['cantidadUnitaria'];
             $producto->riesgo = $fila['riesgo'];             
@@ -266,7 +275,7 @@ class ControladorIngreso extends Controller
           $log->descripcion= "Ingreso con número de acta: ". $user->numero_acta." con cantidad  total de: ".$user->cantidadIngresada ." fue restaurado por : ".$usuario->name; 
           $log->id_usuario= $usuario ->id ; 
           $log->save();
-          $data =["estado"=>"ok","mensaje"=>"Producto restaurado con exito"]; 
+          $data =["estado"=>"ok","mensaje"=>"Ingreso restaurado con exito"]; 
           return response($data,200);
         
         }else{
@@ -291,28 +300,42 @@ class ControladorIngreso extends Controller
             return response($data,404);        
       }else{  
         $ingresoV=Ingreso::withTrashed()->where("id_ingreso","!=",$id)->get();
-         
+        $usuario = Auth::user(); 
         $ingreso = Ingreso::find($id); //instancia del modelo  
-          $ingreso->cedulaNombreRecibe = $req->input('cedulaNombreRecibe');
-          $ingreso->nombreRecibe = $req->input('nombreRecibe');
+          $ingreso->cedulaNombreRecibe = $usuario->cedula;
+          $ingreso->nombreRecibe = $usuario->name;
           $ingreso->fechaIngreso = $req->input('fechaIngreso');
-          $ingreso->numero_acta = $req->input('numero_acta');  
-          $ingreso->cantidadIngresada = $req->input('cantidadIngresada');  
+          $ingreso->numero_acta = $req->input('numero_acta');   
           $ingreso->ubicacionOperativo = $req->input('ubicacionOperativo');
+          $ingreso->id_vendedor = $req->input('id_vendedor');
           $cont=0;
         foreach($ingresoV as $fila) {         
           if ($fila->numero_acta==$ingreso->numero_acta ) {
             $cont++;  //se verifica duplicidad           
           }}
+
+          $vend = Vendedor::get(); // se obtiene todos los objetos de la BD       
+        //codigo de barra unico con respecto al json a ingresar y los que estan en BD
+        $cont6=0;
+        foreach($vend as $fila) {          
+           if ($fila->id_vendedor==$ingreso->id_vendedor) {
+              $cont6++;  //se verifica duplicidad                   
+          } 
+        }
+
+        if($cont6==0){
+          $data =["estado"=>"error","mensaje"=>"El vendedor no se encuentra registrado"];    
+            return response($data, 402); 
+        }
           
-          if($cont==0){
+          if($cont==0){            
+            $ingreso->save();
             //Log ingreso modificado
             $log =  new Log; 
             $usuario = Auth::user();  
             $log->descripcion= "Ingreso con número de acta: ". $ingreso->numero_acta." con cantidad  total de: ".$ingreso->cantidadIngresada ." fue editado por : ".$usuario->name; 
             $log->id_usuario= $usuario ->id ; 
             $log->save();
-            $ingreso->save();
             $data =["estado"=>"ok","mensaje"=>"Ingreso modificado con exito"];    
             return response($data, 200);
            }else{
@@ -331,11 +354,81 @@ class ControladorIngreso extends Controller
       ->where("deleted_at","=",null )
       ->get();
       
-    if(!$pro->isEmpty()){        
-      return response($pro,200);
-                        
-      }else{
-        $data =["estado"=>"error","mensaje"=>"No se encontraron datos"]; 
-        return response($data,404);  
-      }}
+      if(!$pro->isEmpty()){        
+        return response($pro,200);
+                          
+        }else{
+          $data =["estado"=>"error","mensaje"=>"No se encontraron datos"]; 
+          return response($data,404);  
+        }
+    }
+
+
+    public function ingresosParaSalida(){ 
+        $datos =[];
+        $datosIngreso = Ingreso::all();
+          
+        if(!$datosIngreso){
+          $data =["estado"=>"error","mensaje"=>"No hay ingresos  guardados"];
+          return response($data,404); 
+         }
+
+      foreach($datosIngreso as $fila){
+          $normal = DB::table('producto')->where('id_salida','=', null)->where('riesgo','=' ,'no')->where('id_ingreso','=',$fila->id_ingreso)->where('deleted_at','=', null)->sum('cantidadUnitaria');
+          $riesgo = DB::table('producto')->where('id_salida','=', null)->where('riesgo','=' ,'si')->where('id_ingreso','=',$fila->id_ingreso)->where('deleted_at','=', null)->sum('cantidadUnitaria');
+           
+          if($normal!=0){
+            $users = DB::table('producto')
+            ->join('vendedor', 'vendedor.id_vendedor', '=', 'producto.id_vendedor')  
+            ->join('ingreso', 'ingreso.id_ingreso', '=', 'producto.id_ingreso')            
+            ->select('ingreso.id_ingreso','ingreso.fechaIngreso','ingreso.numero_acta','ingreso.cantidadIngresada','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos')
+            ->where("producto.deleted_at","=",null )
+            ->where("producto.id_ingreso","=",$fila->id_ingreso )
+            ->where("ingreso.id_ingreso","=",$fila->id_ingreso )
+            ->where("producto.riesgo","=","no" )
+            ->where('producto.id_salida','=', null)
+            ->where("ingreso.deleted_at","=",null )
+            ->where("vendedor.deleted_at","=",null )
+           ->groupBy('ingreso.id_ingreso','ingreso.fechaIngreso','ingreso.numero_acta','ingreso.cantidadIngresada','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos')
+           ->having('ingreso.numero_acta','=',$fila->numero_acta)
+            ->get();           
+          
+            foreach($users as $fila2){
+              $datos1 = array("id_ingreso"=>$fila2->id_ingreso,"fechaIngreso"=>$fila2->fechaIngreso,"numero_acta"=>$fila2->numero_acta,"cantidadIngresada"=> $fila2->cantidadIngresada,"Normal"=> $normal,"cedula"=>$fila2->cedula,"nombres"=>$fila2->nombres,"apellidos"=>$fila2->apellidos);   
+              array_push($datos, $datos1);          
+            }
+          }
+          
+          if($riesgo!=0){
+
+            $users = DB::table('producto')
+            ->join('vendedor', 'vendedor.id_vendedor', '=', 'producto.id_vendedor')  
+            ->join('ingreso', 'ingreso.id_ingreso', '=', 'producto.id_ingreso')            
+            ->select('ingreso.id_ingreso','ingreso.fechaIngreso','ingreso.numero_acta','ingreso.cantidadIngresada','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos')
+            ->where("producto.deleted_at","=",null )
+            ->where("producto.id_ingreso","=",$fila->id_ingreso )
+            ->where("ingreso.id_ingreso","=",$fila->id_ingreso )
+            ->where("producto.riesgo","=","si" )
+            ->where('producto.id_salida','=', null)
+            ->where("ingreso.deleted_at","=",null )
+            ->where("vendedor.deleted_at","=",null )
+           ->groupBy('ingreso.id_ingreso','ingreso.fechaIngreso','ingreso.numero_acta','ingreso.cantidadIngresada','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos')
+           ->having('ingreso.numero_acta','=',$fila->numero_acta)
+            ->get();           
+          
+            foreach($users as $fila3){
+              $datos2 = array("id_ingreso"=>$fila3->id_ingreso,"fechaIngreso"=>$fila3->fechaIngreso,"numero_acta"=>$fila3->numero_acta,"cantidadIngresada"=> $fila3->cantidadIngresada,"Riesgo"=> $riesgo,"cedula"=>$fila3->cedula,"nombres"=>$fila3->nombres,"apellidos"=>$fila3->apellidos);   
+              array_push($datos, $datos2);          
+            }
+
+          }              
+            
+      }
+        if(!$datos){
+              $data =["estado"=>"error","mensaje"=>"No ingresos  guardados"];
+              return response($data,404); 
+          }else{
+            return response($datos,200);
+          }        
+    }
 }

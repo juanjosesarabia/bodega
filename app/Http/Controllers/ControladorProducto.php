@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Log;
 use Illuminate\Support\Facades\Auth; 
 use App\Producto;
+use App\Ingreso;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\ControladorProductoRequest;
@@ -21,26 +22,73 @@ class ControladorProducto extends Controller
         $producto->nombre = $req->input('nombre');
         $producto->descripcion = $req->input('descripcion');
         $producto->codigoBarra = $req->input('codigoBarra');
-        $producto->id_vendedor = $req->input('id_vendedor'); 
         $producto->riesgo = $req->input('riesgo'); 
         $producto->cantidadUnitaria= $req->input('cantidadUnitaria');
+        $acta= $req->input('numero_acta');
+
+         $validator = Validator::make($req->all(), [
+          'numero_acta' => 'required|numeric',        
+          ]);
+
+         if ($validator->fails()) {
+            $data =["estado"=>"error","mensaje"=>"Número de acta esta  vacío o no es numerico"];            
+            return response($data,404);                  
+          }
         
-        
-        
-        if(!$producto->save()){
-            $data =["estado"=>"error","mensaje"=>"Los productos no se registraron"];    
-            return response($data, 402); 
+        $ingreso = Ingreso::where("numero_acta","=",$acta)->get();
+
+        if($ingreso->isEmpty()){
+          $data =["estado"=>"error","mensaje"=>"El número de acta no se encuentra registrado en la bases de datos"];    
+          return response($data, 404); 
          }else{
-            $producto->save();
-             //Log registrar producto
-             $log =  new Log; 
-             $usuario = Auth::user();  
-             $log->descripcion= "Producto : ".$producto->nombre." con codigo de barra ".$producto->codigoBarra ." registrado por : ".$usuario->name; 
-             $log->id_usuario= $usuario ->id ; 
-             $log->save(); 
-            $data =["estado"=>"ok","mensaje"=>"Los productos se registraron exitosamente"];    
-            return response($data, 200);  
-         }                 
+          foreach($ingreso as $fila){
+            $producto->id_vendedor =$fila->id_vendedor;
+            $producto->id_ingreso=$fila->id_ingreso;
+            $verificaProducto = Producto::where("id_ingreso","=",$fila->id_ingreso)->where("riesgo","=",$producto->riesgo)->get();
+           }
+           $cont=0;
+          foreach($verificaProducto as $fila){
+            if($fila->id_salida!=null){
+              $cont++;
+              }}
+
+           if($cont!=0){
+              $data =["estado"=>"error","mensaje"=>"No se puede agregar productos a un ingreso que ya se le realizó salida"];    
+              return response($data, 404); 
+            }else{
+              $prod = Producto::withTrashed()->get(); // se obtiene todos los objetos de la BD    
+                $cont2=0;  
+                foreach($prod as $fila5){//validar codigo de barra no este usado
+                  if ($fila5->codigoBarra==$producto->codigoBarra) {             
+                    $cont2++;  //se verifica duplicidad                   
+                  }} 
+
+                 if($cont2!=0){
+                    $data =["estado"=>"error","mensaje"=>"No se puede agregar producto, codigo de barra usado"];    
+                    return response($data, 404);
+                  }else{  
+
+                   $suma = DB::table('producto')->where('id_salida','=', null)->where('id_ingreso','=',$producto->id_ingreso)->where('deleted_at','=', null)->sum('cantidadUnitaria');                
+                    
+                    $producto->save();//guardar producto 
+                    $valorNuevo=$producto->cantidadUnitaria+$suma;//suma de valores
+                    
+                    $paraIngreso = Ingreso::where("id_ingreso","=",$producto->id_ingreso)->first();//busco el ingreso
+                    $paraIngreso->cantidadIngresada= $valorNuevo; //asigno nuevo total
+                    $paraIngreso->save();
+                    
+                    //Log registrar producto
+                    $log =  new Log; 
+                    $usuario = Auth::user();  
+                    $log->descripcion= "Producto : ".$producto->nombre." con codigo de barra ".$producto->codigoBarra ." registrado y agregado a número de acta ".$acta."  por : ".$usuario->name; 
+                    $log->id_usuario= $usuario ->id ; 
+                    $log->save(); 
+                    
+                  $data =["estado"=>"ok","mensaje"=>"Los productos se registraron exitosamente"];    
+                  return response($data, 200);  
+                }
+            } 
+        } 
      } 
      
      //método para obtener todos los datos registrados de productos.
@@ -93,35 +141,65 @@ class ControladorProducto extends Controller
         if(!Producto::find($id)){//verificar si en la bd hay registros
               $data =["estado"=>"error","mensaje"=>"No se encontró dato de producto a modificar"]; 
               return response($data,404);        
-        }else{   
+        }else{             
 
-            $produc=producto::withTrashed()->where("id_producto","!=",$id)->get();
-            $producto = Producto::find($id);             
-            $producto->nombre = $req->input('nombre');
+            $produc=producto::withTrashed()->where("id_producto","!=",$id)->get();//buscar productor para verificar codigo barra
+            $producto = Producto::find($id);//buscar producto a modificar
+
+            $ingreso = Ingreso::where("id_ingreso","=",$producto->id_ingreso)->first(); //buscar ingreso
+             
+            $producto->nombre = $req->input('nombre');//captura todos los datos del request
             $producto->descripcion = $req->input('descripcion');
             $producto->codigoBarra = $req->input('codigoBarra');
-            $producto->cantidadUnitaria= $req->input('cantidadUnitaria');
-            $producto->id_vendedor = $req->input('id_vendedor'); 
+            $producto->cantidadUnitaria= $req->input('cantidadUnitaria');            
             $producto->riesgo = $req->input('riesgo');  
-             $cont=0;
-            foreach($produc as $fila) {         
-              if ($fila->codigoBarra==$producto->codigoBarra ) {
-                $cont++;  //se verifica duplicidad           
-              }}
-            if($cont==0){
-              $producto->save();
-              //Log editar producto
-             $log =  new Log; 
-             $usuario = Auth::user();  
-             $log->descripcion= "Producto : ".$producto->nombre." con codigo de barra ".$producto->codigoBarra ."fue editado por : ".$usuario->name; 
-             $log->id_usuario= $usuario ->id ; 
-             $log->save(); 
-              $data =["estado"=>"ok","mensaje"=>"Producto modificado con exito"];    
-              return response($data, 200);
+
+           
+              $producto->id_vendedor =$ingreso->id_vendedor; //asignamos id vendedor al producto  a modificar         
+              $verificaProducto = Producto::where("id_ingreso","=",$ingreso->id_ingreso)->where("riesgo","=",$producto->riesgo)->get();//veriifcamos salida
+            
+             $cont1=0;
+            foreach($verificaProducto as $fila){
+              if($fila->id_salida!=null){
+                $cont1++;
+                }}
+
+            if($cont1!=0){
+                  $data =["estado"=>"error","mensaje"=>"No puedes editar un producto al cual se le dio salida"];    
+                  return response($data, 404);
             }else{
-              $data =["estado"=>"error","mensaje"=>" Código de barra ya esta registrado"]; 
-              return response($data,401); 
+              $cont=0;
+              foreach($produc as $fila) {         
+                if ($fila->codigoBarra==$producto->codigoBarra ) {
+                  $cont++;  //se verifica duplicidad           
+                }}
+              if($cont==0){                
+  
+                $suma = DB::table('producto')->where('id_salida','=', null)->where('id_producto','!=',$id)->where('id_ingreso','=',$producto->id_ingreso)->where('deleted_at','=', null)->sum('cantidadUnitaria');                
+                    
+                $producto->save();//guardar producto 
+                $valorNuevo=$producto->cantidadUnitaria+$suma;//suma de valores
+                
+                $paraIngreso = Ingreso::where("id_ingreso","=",$producto->id_ingreso)->first();//busco el ingreso
+                $paraIngreso->cantidadIngresada= $valorNuevo; //asigno nuevo total
+                $paraIngreso->save();               
+  
+  
+                //Log editar producto
+               $log =  new Log; 
+               $usuario = Auth::user();  
+               $log->descripcion= "Producto : ".$producto->nombre." con codigo de barra ".$producto->codigoBarra ." fue editado por : ".$usuario->name; 
+               $log->id_usuario= $usuario ->id ; 
+               $log->save(); 
+                $data =["estado"=>"ok","mensaje"=>"Producto modificado con exito"];    
+                return response($data, 200);
+              }else{
+                $data =["estado"=>"error","mensaje"=>" Código de barra ya esta registrado"]; 
+                return response($data,401); 
+              }
+
             }
+            
 
              
         } 
@@ -145,11 +223,20 @@ class ControladorProducto extends Controller
             $data =["estado"=>"error","mensaje"=>"Producto  no se encuentra en registrado base de datos"];            
             return response($data,404);
             }else{
-            $user->delete();
+                           
+              $paraIngreso = Ingreso::where("id_ingreso","=",$user->id_ingreso)->first();//busco el ingreso
+              $suma = DB::table('producto')->where('id_salida','=', null)->where('id_producto','!=',$id)->where('id_ingreso','=',$user->id_ingreso)->where('deleted_at','=', null)->sum('cantidadUnitaria'); 
+             
+              $user->delete();
+                          
+            
+              $paraIngreso->cantidadIngresada= $suma; //asigno nuevo total
+              $paraIngreso->save();       
+           
             //Log eliminar producto
             $log =  new Log; 
             $usuario = Auth::user();  
-            $log->descripcion= "Producto : ".$user->nombre." con codigo de barra ".$user->codigoBarra ." fue eliminado por : ".$usuario->name; 
+            $log->descripcion= "Producto : ".$user->nombre." con codigo de barra ".$user->codigoBarra ." fue eliminado por : ".$usuario->name.", su ingreso total es ".$suma; 
             $log->id_usuario= $usuario ->id ; 
             $log->save(); 
             $data =["estado"=>"ok","mensaje"=>"Producto eliminado exitosamente"];            
@@ -237,6 +324,15 @@ class ControladorProducto extends Controller
         
           if($user && $user->deleted_at !=null){//verifica que el usuario cumpla las condciones         
           Producto::onlyTrashed()->find($id)->restore();
+
+          $suma = DB::table('producto')->where('id_salida','=', null)->where('id_ingreso','=',$user->id_ingreso)->where('deleted_at','=', null)->sum('cantidadUnitaria');                
+                    
+               
+                
+                $paraIngreso = Ingreso::where("id_ingreso","=",$user->id_ingreso)->first();//busco el ingreso
+                $paraIngreso->cantidadIngresada=  $suma; //asigno nuevo total
+                $paraIngreso->save();               
+  
           //Log restaurar producto
           $log =  new Log; 
           $usuario = Auth::user();  

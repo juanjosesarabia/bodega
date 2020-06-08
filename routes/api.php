@@ -54,6 +54,7 @@ Route::group(['middleware' => 'auth:api'], function(){   // Validacion con token
     Route::post('restoreIngreso','ControladorIngreso@restoreIngreso');//Restaurar ingresos eliminados
     Route::put("editIngreso",'ControladorIngreso@editIngreso'); //editar ingreso
     Route::get('searchIngreso/{acta}', 'ControladorIngreso@searchIngreso')->where('acta', '[0-9]+');//Buscar ingreso por acta
+    Route::get('getIngresoParaSalida', 'ControladorIngreso@ingresosParaSalida');//Obtener todos los ingresos para generar salida
 
     Route::post('registerSalida', 'ControladorSalida@registerSalidaNormal');//Registrar salida productos sin riesgo
     Route::post('registerSalidaRiesgo', 'ControladorSalida@registerSalidaRiesgo');// Registrar salida Riesgo
@@ -65,5 +66,7 @@ Route::group(['middleware' => 'auth:api'], function(){   // Validacion con token
     Route::put('aprobarSalidaR', 'ControladorSalida@aprobarSalidaRiesgo'); //Aprobar Salida Riesgo
     Route::delete('deleteSalida','ControladorSalida@deleteSalida'); //Eliminar ingreso
     Route::post('restoreSalida','ControladorSalida@restoreSalida'); //Eliminar ingreso
-    Route::get('searchSalida/{fecha}', 'ControladorSalida@searchSalida');
+    Route::get('searchSalida/{fecha}', 'ControladorSalida@searchSalida');//Buscar salida por fecha
+
+    Route::get('getLog', 'ControladorLog@logAll'); //Obtener todos los datos de salida
 });

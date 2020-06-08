@@ -32,9 +32,9 @@ class ControladorProductoRequest extends FormRequest
         return [           
             'nombre' => 'nombre',            
             'descripcion' => 'descripcion',
-            'codigoBarra' => 'codigoBarra',
-            'id_vendedor' => 'id_vendedor',
-            'riesgo'=>'riesgo'     
+            'codigoBarra' => 'codigoBarra',            
+            'riesgo'=>'riesgo'  ,
+            'cantidadUnitaria'=>'cantidadUnitaria'   
         ];
     }
     
@@ -49,8 +49,6 @@ class ControladorProductoRequest extends FormRequest
                 'descripcion.string' => 'La descripcion  debe ser cadena de datos',
                 'codigoBarra.required' => 'El codigo de barra es obligatorio.',
                 'codigoBarra.numeric' => 'El codigo de barra  debe númerico',
-                'id_vendedor.required' => 'El id del vendedor es obligatorio.',
-                'id_vendedor.numeric' => 'El id del vendedor debe ser númerico',
                 'riesgo.required' => 'El riesgo es obligatorio.',
                 'riesgo.string' => 'El riesgo debe ser una cadena de datos',
                 'cantidadUnitaria.required'=>'La cantidad unitaria es obligatorio',
@@ -63,7 +61,6 @@ class ControladorProductoRequest extends FormRequest
             'nombre' => 'required|string',            
             'descripcion' => 'required|string',
             'codigoBarra' => 'required|numeric',
-            'id_vendedor' => 'required|numeric',
             'riesgo'=>'required|string',
             'cantidadUnitaria'=>'required|numeric'             
         ];

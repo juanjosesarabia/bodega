@@ -28,10 +28,8 @@ class ControladorIngresoRequest extends FormRequest
     public function attributes()
     {
         return [           
-            'nombre' => 'nombre',            
-            'nombreRecibe' => 'Nombre de quien Recibe',
+            'numero_acta' =>'Número de acta',
             'fechaIngreso' => 'fecha de Ingreso',
-            'cantidadIngresada' => 'cantidadIngresada',
             'ubicacionOperativo'=>'ubicacionOperativo'     
         ];
     }
@@ -41,16 +39,11 @@ class ControladorIngresoRequest extends FormRequest
         public function messages()
         {
             return [
-                'cedulaNombreRecibe.required' => 'La cédula  es obligatoria.',
-                'cedulaNombreRecibe.numeric' => 'La cédula debe ser numérica',
-                'nombreRecibe.required' => 'El nombre de quien recibe es obligatorio.',
-                'nombreRecibe.string' => 'La nombre de quien recibe debe ser cadena de datos',
+                
                 'fechaIngreso.required' => 'La fecha de Ingreso es obligatoria.',
                 'fechaIngreso.date' => 'La fecha de Ingreso debe tener formato AAAA-MM-DD',
                 'numero_acta.required' => 'El número de acta  es obligatorio.',
                 'numero_acta.numeric' => 'El número acta debe ser entero ',
-                'cantidadIngresada.required' => 'La cantidad de articulos es obligatoria.',
-                'cantidadIngresada.numeric' => 'La cantidad de articulos debe ser numerica',
                 'ubicacionOperativo.required' => 'La ubicación del operativo debe ser obligatoria.',
                 'ubicacionOperativo.string' => 'La ubicación del operativo debe ser una cadena de datos',
 
@@ -59,11 +52,8 @@ class ControladorIngresoRequest extends FormRequest
     public function rules()
     {
         return [            
-            'cedulaNombreRecibe' => 'required|numeric',            
-            'nombreRecibe' => 'required|string',
             'fechaIngreso' => 'required|date',
             'numero_acta' => 'required|numeric',
-            'cantidadIngresada'=>'required|numeric',
             'ubicacionOperativo'=>'required|string'           
         ];
     }
