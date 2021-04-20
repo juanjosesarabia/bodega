@@ -50,6 +50,10 @@ Route::group(['middleware' => 'auth:api'], function(){   // Validacion con token
     Route::get('getIngreso', 'ControladorIngreso@ingresosAll');//Obtener todos los ingresos individuales
     Route::get('getIngreSolo', 'ControladorIngreso@ingresosAllSolo');//Obtener todos los ingresos unitarios
     Route::get('getIngresoDelete', 'ControladorIngreso@ingresosDeleteAll');//Obtener todos los ingresos eliminados
+    Route::get('getIngresosEliminados', 'ControladorIngreso@ingresosEliminados');//Obtener todos los ingresos eliminados solos
+    Route::get('getIngreVer', 'ControladorIngreso@ingresosVer');//todos los ingresos con sus productos
+    Route::get('getIngreOne', 'ControladorIngreso@ingresosOne');//Un ingreso con sus productos
+     
     Route::delete('deleteIngreso','ControladorIngreso@deleteIngreso'); //Eliminar ingreso
     Route::post('restoreIngreso','ControladorIngreso@restoreIngreso');//Restaurar ingresos eliminados
     Route::put("editIngreso",'ControladorIngreso@editIngreso'); //editar ingreso
@@ -69,4 +73,6 @@ Route::group(['middleware' => 'auth:api'], function(){   // Validacion con token
     Route::get('searchSalida/{fecha}', 'ControladorSalida@searchSalida');//Buscar salida por fecha
 
     Route::get('getLog', 'ControladorLog@logAll'); //Obtener todos los datos de salida
+
+    Route::get('getData','ControladorLog@getAll');//obtner data da las dashboard
 });

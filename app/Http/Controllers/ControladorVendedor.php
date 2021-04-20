@@ -56,9 +56,11 @@ class ControladorVendedor extends Controller
           return response($data,404);        
         }else{
           foreach($ven as $fila) { 
-            $datos1 = array("id"=>$fila->id_vendedor,"cedula"=>$fila->cedula,"nombres"=>$fila->nombres,"apellidos"=> $fila->apellidos,"teléfono"=> $fila->telefono);   
+            $datos1 = array("id"=>$fila->id_vendedor,"cedula"=>$fila->cedula,"nombres"=>$fila->nombres,"apellidos"=> $fila->apellidos,"telefono"=> $fila->telefono);   
             array_push($datos, $datos1);                            
            }
+           
+
           return response($datos, 200);        
           }
       }
@@ -150,7 +152,7 @@ class ControladorVendedor extends Controller
       return response($data,404);        
     }else{
       foreach($user as $fila) { 
-        $datos1 = array("id"=>$fila->id_vendedor,"cedula"=>$fila->cedula,"nombres"=>$fila->nombres,"apellidos"=> $fila->apellidos,"teléfono"=> $fila->telefono,"Eliminado"=> $fila->deleted_at);   
+        $datos1 = array("id"=>$fila->id_vendedor,"cedula"=>$fila->cedula,"nombres"=>$fila->nombres,"apellidos"=> $fila->apellidos,"telefono"=> $fila->telefono,"Eliminado"=> $fila->deleted_at);   
         array_push($datos, $datos1);                            
        }
       return response($datos, 200);        

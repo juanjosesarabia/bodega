@@ -189,13 +189,11 @@ class ControladorIngreso extends Controller
     }
 
 
-    public function ingresosAllSolo(){      
-         
+    public function ingresosAllSolo(){  
       $users = DB::table('vendedor')
       ->join('ingreso', 'ingreso.id_vendedor', '=', 'vendedor.id_vendedor')  
-      ->select('ingreso.id_ingreso','ingreso.cedulaNombreRecibe','ingreso.nombreRecibe','ingreso.fechaIngreso','ingreso.numero_acta','ingreso.cantidadIngresada','ingreso.ubicacionOperativo','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos','vendedor.telefono')
-      ->where("ingreso.deleted_at","=",null )
-      
+      ->select('ingreso.id_ingreso','ingreso.cedulaNombreRecibe','ingreso.nombreRecibe','ingreso.fechaIngreso','ingreso.numero_acta','ingreso.cantidadIngresada','ingreso.ubicacionOperativo','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos','vendedor.telefono','vendedor.id_vendedor')
+      ->where("ingreso.deleted_at","=",null )      
       ->get();
 
       if($users->isEmpty()){
@@ -206,6 +204,21 @@ class ControladorIngreso extends Controller
       }            
 }
 
+public function ingresosEliminados(){
+  $users = DB::table('vendedor')
+      ->join('ingreso', 'ingreso.id_vendedor', '=', 'vendedor.id_vendedor')  
+      ->select('ingreso.id_ingreso','ingreso.cedulaNombreRecibe','ingreso.nombreRecibe','ingreso.fechaIngreso','ingreso.numero_acta','ingreso.cantidadIngresada','ingreso.ubicacionOperativo',"ingreso.deleted_at",'vendedor.cedula', 'vendedor.nombres','vendedor.apellidos','vendedor.telefono')
+      ->where("ingreso.deleted_at","!=",null )      
+      ->get();
+
+      if($users->isEmpty()){
+          $data =["estado"=>"error","mensaje"=>"No ingresos  guardados como eliminados"];
+          return response($data,404); 
+      }else{
+          return $users;
+      }       
+}
+
 
     
     public function ingresosDeleteAll(){              
@@ -214,7 +227,6 @@ class ControladorIngreso extends Controller
       ->join('ingreso', 'ingreso.id_ingreso', '=', 'producto.id_ingreso')
       ->select('ingreso.id_ingreso','ingreso.cedulaNombreRecibe', 'ingreso.nombreRecibe','ingreso.fechaIngreso','ingreso.numero_acta','ingreso.cantidadIngresada','ingreso.ubicacionOperativo','producto.id_producto','producto.nombre','producto.codigoBarra','producto.cantidadUnitaria','producto.riesgo','vendedor.cedula', 'vendedor.nombres','vendedor.apellidos','vendedor.telefono')
       ->where("ingreso.deleted_at","!=",null )
-      
       ->get();
 
       if($users->isEmpty()){
@@ -226,7 +238,6 @@ class ControladorIngreso extends Controller
     }
 
     public function deleteIngreso(Request $req){      
-
       $validator = Validator::make($req->all(), [
           'id_ingreso' => 'required|numeric',        
       ]);
@@ -363,7 +374,7 @@ class ControladorIngreso extends Controller
         }
     }
 
-
+// metodo para obtener los ingresos que pueden generar salidas
     public function ingresosParaSalida(){ 
         $datos =[];
         $datosIngreso = Ingreso::all();
@@ -431,4 +442,63 @@ class ControladorIngreso extends Controller
             return response($datos,200);
           }        
     }
+
+//Obtener todos los ingresos con sus productos
+    public function ingresosVer(){      
+      $datos =[];
+      $users= Ingreso::all();
+     
+      if($users->isEmpty()){
+          $data =["estado"=>"error","mensaje"=>"No ingresos  guardados"];
+          return response($data,404); 
+      }else{
+        foreach($users as $fila){
+          $productos = DB::table('producto')
+          ->join('vendedor', 'vendedor.id_vendedor', '=', 'producto.id_vendedor')           
+          ->select('producto.id_producto','producto.nombre','producto.descripcion','producto.codigoBarra','producto.cantidadUnitaria','producto.riesgo')
+          ->where("producto.id_ingreso","=",$fila->id_ingreso )
+          ->where("producto.deleted_at","=",null )
+          ->get();
+
+          $datos2 = array("id_ingreso"=>$fila->id_ingreso,"fechaIngreso"=>$fila->fechaIngreso,"numero_acta"=>$fila->numero_acta,"cantidadIngresada"=> $fila->cantidadIngresada,"productos"=>$productos);   
+              array_push($datos, $datos2); 
+          
+        }
+        return $datos;
+      }}
+
+
+      //Metodo para obtener un ingreso con sus productos
+      public function ingresosOne(Request $req){      
+        $validator = Validator::make($req->all(), [
+          'id_ingreso' => 'required|numeric'       
+      ]);
+
+      if ($validator->fails()) {
+          $data =["estado"=>"error","mensaje"=>"id esta vacío o no es numerico"]; 
+          return response($data,404); 
+      }
+      $datos =[];
+      $id =  $req->input('id_ingreso');      
+      $users = Ingreso::find($id);    
+      if(!$users){
+          $data =["estado"=>"error","mensaje"=>"No existe ingreso guardado con ese id"];
+          return response($data,404); 
+      }else{
+       
+          $productos = DB::table('producto')
+          ->join('vendedor', 'vendedor.id_vendedor', '=', 'producto.id_vendedor')           
+          ->select('producto.id_producto','producto.nombre','producto.descripcion','producto.codigoBarra','producto.cantidadUnitaria','producto.riesgo')
+          ->where("producto.id_ingreso","=",$users->id_ingreso )
+          ->where("producto.deleted_at","=",null )
+          ->get();
+
+          $vendedor = DB::table('vendedor')   
+          ->select('id_vendedor','cedula','nombres','apellidos','telefono')     
+          ->where("id_vendedor","=",$users->id_vendedor )
+          ->get();
+          $ingreso = array("id_ingreso"=>$users->id_ingreso,"fechaIngreso"=>$users->fechaIngreso,"numero_acta"=>$users->numero_acta,"cantidadIngresada"=>$users->cantidadIngresada,"recibe"=>$users->nombreRecibe,"operativo"=>$users->ubicacionOperativo);
+          $datos = array("ingreso"=> $ingreso,"vendedor"=> $vendedor,"productos"=>$productos);           
+        return $datos;
+      }}
 }

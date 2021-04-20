@@ -15,6 +15,16 @@ class UsuarioPrueba extends Controller
 
     public function validateUser(Request $req){ 
 
+      $validator = Validator::make($req->all(), [
+        'email' => 'required|regex:/^.+@.+$/i',
+        'password'=>'required|string'      
+       ]);
+
+      if ($validator->fails()) {
+          $data =["estado"=>"error","mensaje"=>"El correo es inválido, la contraseña es obligatoria"];            
+          return response($data,404);                  
+       }
+
         $correo= $req->input('email'); //registros a comparar 
         $contrasena= $req->input('password'); 
 
@@ -25,7 +35,7 @@ class UsuarioPrueba extends Controller
         if(Auth::attempt(['email' => $correo, 'password' => $contrasena])){ 
             $user = Auth::user(); 
             if($user->tipo_usuario=="No asignado"){
-                $data =["estado"=>"error","mensaje"=>"No tienes aprobación de usuario Administrador"];            
+                $data =["estado"=>"error","mensaje"=>"No tienes aprobación de usuario Administrador para ingresar al Sistema"];            
                 return response($data,401);
             }else{
               $datos["name"] =$user->name;
@@ -40,7 +50,7 @@ class UsuarioPrueba extends Controller
               return response($data,200); 
              }
         }else{ 
-            $data =["estado"=>"error","mensaje"=>"Credenciales invalidas"];            
+            $data =["estado"=>"error","mensaje"=>"Credenciales inválidas"];            
             return response($data,401);       
         } 
     }
@@ -69,7 +79,7 @@ class UsuarioPrueba extends Controller
               $usuario->password =  bcrypt($req->input('password')); 
               
               $usuario->save();
-              $data =["estado"=>"ok","mensaje"=>"Usuario registrado con exito"];    
+              $data =["estado"=>"ok","mensaje"=>"Usuario registrado con éxito"];    
               return response($data, 200); 
             }  
  
@@ -101,14 +111,24 @@ class UsuarioPrueba extends Controller
             $data =["estado"=>"error","mensaje"=>"id esta  vacío o no es numerico"];            
             return response($data,404);                  
          }
-        $id =  $req->input('id');               
+        $id =  $req->input('id');   
+        
+        $validator = Validator::make($req->all(), [
+          'tipo_usuario' => 'required|string',        
+         ]);
+
+      if ($validator->fails()) {
+        $data =["estado"=>"error","mensaje"=>"Tipo de usuario  a guardar esta vacío o no es una cadena"];            
+        return response($data,404);                  
+       }
+
         
         if(!User::find($id)){//verificar si en la bd hay registros
               $data =["estado"=>"error","mensaje"=>"No se encontró dato de usuario a modificar"]; 
               return response($data,404);        
         }else{   
              $userAll =User::withTrashed()->where("id","!=",$id)->get();
-             
+            
              $user = User::find($id); 
              $cedula= $req->input('cedula'); //registros a comparar 
              $email= $req->input('email');           
@@ -118,11 +138,13 @@ class UsuarioPrueba extends Controller
               if ($fila->cedula==$cedula||$fila->email==$email ) {
                 $cont++;  //se verifica duplicidad           
               }}
+               
              if($cont==0){             
                 $user->cedula = $req->input('cedula');
                 $user->name = $req->input('name');               
                 $user->email = $req->input('email');
-                $user->password =  bcrypt($req->input('password'));             
+                $user->password =  bcrypt($req->input('password'));     
+                $user->tipo_usuario = $req->input("tipo_usuario");        
                 $user->save();
                 //Log Editar usuario
                 $log =  new Log; 
@@ -264,6 +286,8 @@ class UsuarioPrueba extends Controller
           return response($data,404);                  
       }
         $id =  $req->input('id');
+
+      
         
       if(User::find($id)!=null){
             $user =  User::find($id);        
