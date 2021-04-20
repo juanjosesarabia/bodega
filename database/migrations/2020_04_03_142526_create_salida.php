@@ -16,11 +16,11 @@ class CreateSalida extends Migration
         Schema::create('salida', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->bigIncrements('id_salida');            
-            $table->integer('cedulaNombreRetira')->required();;
+            $table->integer('cedulaNombreRetira',100)->required();;
             $table->string('nombreRetira', 300)->required();;
             $table->set('salidaAprobada', ['si', 'no'])->default('no');;
             $table->date('fechaSalida');
-            $table->integer('cedulaNombreOficiaSalida')->nullable();
+            $table->integer('cedulaNombreOficiaSalida',100)->nullable();
             $table->string('nombreOficiaSalida', 300)->nullable();;
             $table->integer("cantidadRetirada")->required();
             $table->set('datoSalida', ['entrega', 'destruccion','custodia'])->default('entrega');
