@@ -16,7 +16,7 @@ class CreateVendedor extends Migration
         Schema::create('vendedor', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->bigIncrements("id_vendedor");
-            $table->integer("cedula",100)->unique()->required();;            
+            $table->biginteger("cedula")->length(100)->unique()->required();;            
             $table->String("nombres",100)->required();;
             $table->String("apellidos",100)->required();;            
             $table->String("telefono",100);           

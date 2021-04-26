@@ -17,9 +17,9 @@ class CreateProducto extends Migration
             $table->engine = 'InnoDB';
             $table->bigIncrements('id_producto');
             $table->string('nombre', 100)->required();;
-            $table->string('descripcion', 5000)->required();; 
-            $table->string('codigoBarra', 1000)->unique()->required();
-            $table->bigInteger('cantidadUnitaria',50)->unsigned()->nullable();
+            $table->string('descripcion', 500)->required();; 
+            $table->string('codigoBarra', 100)->unique()->required();
+            $table->bigInteger('cantidadUnitaria')->length(100)->unsigned()->nullable();
             $table->bigInteger('id_vendedor')->unsigned()->nullable();
             $table->foreign('id_vendedor')->references('id_vendedor')->on('vendedor')->onDelete('cascade');
             $table->bigInteger('id_ingreso')->unsigned()->nullable();
