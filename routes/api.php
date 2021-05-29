@@ -41,7 +41,7 @@ Route::group(['middleware' => 'auth:api'], function(){   // Validacion con token
     Route::get('getsProducDelete', 'ControladorProducto@productosDeleteAll');//Obtener todos los productos con vendedores y eliminados
     Route::put("editProducto",'ControladorProducto@editProducto'); //editar producto
     Route::delete('deleteProducto','ControladorProducto@deleteProducto'); // Estado eliminado para producto
-    Route::get('searchProducto/{id}', 'ControladorProducto@searchProducto')->where('id', '[0-9]+');//Buscar un producto
+    Route::get('searchProducto', 'ControladorProducto@searchProducto');//Buscar un producto
     Route::get('searchProductoC/{codigo}', 'ControladorProducto@searchProductoC')->where('codigo', '[0-9]+');
     Route::get('searchProductoE/{estado}', 'ControladorProducto@searchProductoE');
     Route::post('restoreProducto','ControladorProducto@restoreProducto');//Obtener producto eliminados

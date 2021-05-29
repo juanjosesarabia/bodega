@@ -129,14 +129,14 @@ class ControladorProducto extends Controller
      //método para editar producto registrado
      public function editProducto(ControladorProductoRequest $req){
         $validator = Validator::make($req->all(), [
-          'id' => 'required|numeric',        
+          'id_producto' => 'required|numeric',        
          ]);
   
         if ($validator->fails()) {
             $data =["estado"=>"error","mensaje"=>"id esta  vacío o no es numerico"];            
             return response($data,404);                  
          }
-        $id =  $req->input('id');               
+        $id =  $req->input('id_producto');               
         
         if(!Producto::find($id)){//verificar si en la bd hay registros
               $data =["estado"=>"error","mensaje"=>"No se encontró dato de producto a modificar"]; 
@@ -209,7 +209,7 @@ class ControladorProducto extends Controller
    public function deleteProducto(Request $req){      
 
         $validator = Validator::make($req->all(), [
-            'id' => 'required|numeric',        
+            'id_producto' => 'required|numeric',        
         ]);
 
         if ($validator->fails()) {
@@ -217,7 +217,7 @@ class ControladorProducto extends Controller
             return response($data,404);                  
         }
 
-            $id =  $req->input('id');      
+            $id =  $req->input('id_producto');      
             $user = Producto::find($id);        
             if(!$user){
             $data =["estado"=>"error","mensaje"=>"Producto  no se encuentra en registrado base de datos"];            
@@ -262,10 +262,20 @@ class ControladorProducto extends Controller
 
 
        //método para buscar productos registrado
-    public function searchProducto($id){
+    public function searchProducto(Request $req){
+      $validator = Validator::make($req->all(), [
+        'id_producto' => 'required|numeric'       
+    ]);
+
+    if ($validator->fails()) {
+        $data =["estado"=>"error","mensaje"=>"id esta vacío o no es numerico"]; 
+        return response($data,404); 
+    }
+    $id =  $req->input('id_producto'); 
+          
         if(Producto::find($id)){
             $user = Producto::find($id);
-            $datos1 = array("id"=>$user->id_producto,"nombres"=>$user->nombre,"descripcion"=>$user->descripcion,"Codigo Barra"=> $user->codigoBarra,"Cantidad Unitaria"=>$user->cantidadUnitaria);
+            $datos1 = array("id_producto"=>$user->id_producto,"nombre"=>$user->nombre,"descripcion"=>$user->descripcion,"codigoBarra"=> $user->codigoBarra,"riesgo"=> $user->riesgo,"cantidadUnitaria"=>$user->cantidadUnitaria);
             return response($datos1,200);
         }else{
           $data =["estado"=>"error","mensaje"=>"No se encontraron datos"]; 
